@@ -2,7 +2,10 @@ package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Value;
 import ru.yandex.practicum.filmorate.validation.ReleaseDateValid;
@@ -15,7 +18,7 @@ import java.time.LocalDate;
 public class Film {
     int id;
 
-    @NotNull(message = "Название не должно быть null")
+    @NotNull
     @NotBlank(message = "Название не должно быть пустым")
     String name;
 

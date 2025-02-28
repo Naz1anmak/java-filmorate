@@ -17,12 +17,12 @@ import java.time.LocalDate;
 public class User {
     int id;
 
-    @NotNull(message = "Email не должен быть null")
+    @NotNull
     @NotBlank(message = "Email не должен быть пустым")
     @Email(message = "Некорректный формат email")
     String email;
 
-    @NotNull(message = "Логин не должен быть null")
+    @NotNull
     @NotBlank(message = "Логин не должен быть пустым")
     String login;
 

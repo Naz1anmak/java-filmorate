@@ -89,7 +89,8 @@ public class UserControllerTest {
         mockMvc.perform(post("/users")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidUser)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.email").value("Email не должен быть пустым"));
     }
 
     @Test
@@ -99,7 +100,8 @@ public class UserControllerTest {
         mockMvc.perform(post("/users")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidUser)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.email").value("Некорректный формат email"));
     }
 
     @Test
@@ -119,7 +121,8 @@ public class UserControllerTest {
         mockMvc.perform(post("/users")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidUser)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.birthday").value("Дата рождения не может быть в будущем"));
     }
 
     @Test
@@ -129,6 +132,24 @@ public class UserControllerTest {
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Юзер с id " + user.getId() + " не найден"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAllFieldsInvalid() throws Exception {
+        User invalidUser = User.builder()
+                .email(null)
+                .login("")
+                .name(null)
+                .birthday(LocalDate.now().plusDays(1))
+                .build();
+
+        mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(invalidUser)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.email").value("Email не должен быть пустым"))
+                .andExpect(jsonPath("$.login").value("Логин не должен быть пустым"))
+                .andExpect(jsonPath("$.birthday").value("Дата рождения не может быть в будущем"));
     }
 
     @Test
