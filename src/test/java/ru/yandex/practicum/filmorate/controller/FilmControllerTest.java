@@ -136,7 +136,7 @@ class FilmControllerTest {
     @Test
     void shouldThrowExceptionWhenAllFieldsInvalid() throws Exception {
         Film invalidFilm = Film.builder()
-                .name(null)
+                .name("")
                 .description("A".repeat(201))
                 .releaseDate(LocalDate.of(1800, 1, 1))
                 .duration(-1)

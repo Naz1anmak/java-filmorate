@@ -1,20 +1,19 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ReleaseDateValid;
 
 import java.time.LocalDate;
 
-@Value
+@Data
 @Builder(toBuilder = true)
-@JsonDeserialize(builder = Film.FilmBuilder.class)
+@AllArgsConstructor
 public class Film {
     int id;
 
@@ -30,9 +29,4 @@ public class Film {
 
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     int duration;
-
-    @JsonPOJOBuilder(withPrefix = "")
-    public static class FilmBuilder {
-
-    }
 }

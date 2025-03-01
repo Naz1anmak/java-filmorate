@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -20,17 +19,14 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        User validUser = checkUser(user);
-
-        validUser = validUser.toBuilder().id(getNextId()).build();
-        users.put(validUser.getId(), validUser);
-        log.info("Добавлен новый юзер \"{}\" c id {}", validUser.getLogin(), validUser.getId());
-        return validUser;
+        user = user.toBuilder().id(getNextId()).build();
+        users.put(user.getId(), user);
+        log.info("Добавлен новый юзер \"{}\" c id {}", user.getLogin(), user.getId());
+        return user;
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        User validUser = checkUser(user);
         if (user.getId() >= 0 || users.isEmpty()) {
             if (!users.containsKey(user.getId())) {
                 log.error("Юзер с id {} не найден", user.getId());
@@ -38,28 +34,14 @@ public class UserController {
             }
         }
 
-        users.put(validUser.getId(), validUser);
-        log.info("Юзер c id {} обновлен", validUser.getId());
-        return validUser;
+        users.put(user.getId(), user);
+        log.info("Юзер c id {} обновлен", user.getId());
+        return user;
     }
 
     @GetMapping
     public Collection<User> getUsers() {
-        log.debug("Users: {}", users);
         return users.values();
-    }
-
-    private User checkUser(User user) {
-        if (user.getLogin().contains(" ")) {
-            log.error("Логин не может содержать пробелы");
-            throw new ValidationException("Логин не должен содержать пробелы");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user = user.toBuilder().name(user.getLogin()).build();
-            log.debug("Имя пользователя заменено на логин");
-        }
-        log.debug("Валидация пройдена. Возращенный юзер: {}", user);
-        return user;
     }
 
     private int getNextId() {

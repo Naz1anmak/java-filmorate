@@ -24,7 +24,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private UserController userController;
@@ -112,7 +112,7 @@ public class UserControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Логин не должен содержать пробелы"));
+                .andExpect(jsonPath("$.login").value("Логин не должен содержать пробелы"));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class UserControllerTest {
     @Test
     void shouldThrowExceptionWhenAllFieldsInvalid() throws Exception {
         User invalidUser = User.builder()
-                .email(null)
+                .email("")
                 .login("")
                 .name(null)
                 .birthday(LocalDate.now().plusDays(1))

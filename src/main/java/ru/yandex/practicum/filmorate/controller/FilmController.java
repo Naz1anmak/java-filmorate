@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -36,7 +39,6 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> getFilms() {
-        log.debug("Films: {}", films);
         return films.values();
     }
 
