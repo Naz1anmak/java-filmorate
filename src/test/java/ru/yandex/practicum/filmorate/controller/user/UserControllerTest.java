@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.controller.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
@@ -57,7 +57,7 @@ public class UserControllerTest {
 
     @Test
     void shouldCreateValidUserWithId() throws Exception {
-        User userWithId = user.toBuilder().id(1).build();
+        User userWithId = user.toBuilder().id(1L).build();
 
         mockMvc.perform(post("/users")
                         .contentType("application/json")
@@ -90,7 +90,7 @@ public class UserControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.email").value("Email не должен быть пустым"));
+                .andExpect(jsonPath("$.fields.email").value("Email не должен быть пустым"));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class UserControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.email").value("Некорректный формат email"));
+                .andExpect(jsonPath("$.fields.email").value("Некорректный формат email"));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class UserControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.login").value("Логин не должен содержать пробелы"));
+                .andExpect(jsonPath("$.fields.login").value("Логин не должен содержать пробелы"));
     }
 
     @Test
@@ -122,7 +122,7 @@ public class UserControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.birthday").value("Дата рождения не может быть в будущем"));
+                .andExpect(jsonPath("$.fields.birthday").value("Дата рождения не может быть в будущем"));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class UserControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Юзер с id " + user.getId() + " не найден"));
+                .andExpect(jsonPath("$.description").value("Юзер с id " + user.getId() + " не найден"));
     }
 
     @Test
@@ -147,9 +147,9 @@ public class UserControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.email").value("Email не должен быть пустым"))
-                .andExpect(jsonPath("$.login").value("Логин не должен быть пустым"))
-                .andExpect(jsonPath("$.birthday").value("Дата рождения не может быть в будущем"));
+                .andExpect(jsonPath("$.fields.email").value("Email не должен быть пустым"))
+                .andExpect(jsonPath("$.fields.login").value("Логин не должен быть пустым"))
+                .andExpect(jsonPath("$.fields.birthday").value("Дата рождения не может быть в будущем"));
     }
 
     @Test
@@ -177,6 +177,25 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.login").value(userUpdate.getLogin()))
                 .andExpect(jsonPath("$.name").value(userUpdate.getName()))
                 .andExpect(jsonPath("$.birthday").value(userUpdate.getBirthday().toString()));
+    }
+
+    @Test
+    void shouldReturnCorrectUser() throws Exception {
+        String createdUserContent = mockMvc.perform(post("/users")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        User createdUser = objectMapper.readValue(createdUserContent, User.class);
+
+        mockMvc.perform(get("/users/" + createdUser.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.login").value(createdUser.getLogin()))
+                .andExpect(jsonPath("$.name").value(createdUser.getName()))
+                .andExpect(jsonPath("$.email").value(createdUser.getEmail()))
+                .andExpect(jsonPath("$.birthday").value(createdUser.getBirthday().toString()));
     }
 
     @Test
