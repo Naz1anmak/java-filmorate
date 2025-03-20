@@ -23,11 +23,29 @@ public class UserService {
     }
 
     public User create(User user) {
-        return userStorage.create(user);
+        user = user.toBuilder()
+                .id(getNextId())
+                .build();
+
+        userStorage.create(user);
+        log.info("Добавлен новый юзер \"{}\" c id {}", user.getLogin(), user.getId());
+        return user;
     }
 
     public User update(User user) {
-        return userStorage.update(user);
+        User oldUser = userStorage.getUsers().stream()
+                .filter(u -> u.getId().equals(user.getId()))
+                .findFirst()
+                .orElseThrow(() -> {
+                    log.error("Юзер с id {} не найден", user.getId());
+                    return new NotFoundException("Юзер с id " + user.getId() + " не найден");
+                });
+
+        user.getFriends().addAll(oldUser.getFriends());
+
+        userStorage.update(user);
+        log.info("Юзер c id {} обновлен", user.getId());
+        return user;
     }
 
     public User findById(Long userId) {
@@ -84,5 +102,12 @@ public class UserService {
                 .map(userStorage::findById)
                 .flatMap(Optional::stream)
                 .toList();
+    }
+
+    private long getNextId() {
+        return userStorage.getUsers().stream()
+                .mapToLong(User::getId)
+                .max()
+                .orElse(0) + 1;
     }
 }

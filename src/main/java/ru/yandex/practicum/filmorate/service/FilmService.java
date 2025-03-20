@@ -25,11 +25,29 @@ public class FilmService {
     }
 
     public Film create(Film film) {
-        return filmStorage.create(film);
+        film = film.toBuilder()
+                .id(getNextId())
+                .build();
+
+        filmStorage.create(film);
+        log.info("Добавлен новый фильм \"{}\" c id {}", film.getName(), film.getId());
+        return film;
     }
 
     public Film update(Film film) {
-        return filmStorage.update(film);
+        Film oldFilm = filmStorage.getFilms().stream()
+                .filter(f -> f.getId().equals(film.getId()))
+                .findFirst()
+                .orElseThrow(() -> {
+                    log.error("Фильм с id {} не найден", film.getId());
+                    return new NotFoundException("Фильм с id " + film.getId() + " не найден");
+                });
+
+        film.getMovieRatings().addAll(oldFilm.getMovieRatings());
+
+        filmStorage.update(film);
+        log.info("Фильм c id {} обновлен", film.getId());
+        return film;
     }
 
     public Film findById(Long filmId) {
@@ -68,5 +86,12 @@ public class FilmService {
                 .sorted(Comparator.comparingInt((Film film) -> film.getMovieRatings().size()).reversed())
                 .limit(count)
                 .toList();
+    }
+
+    private long getNextId() {
+        return filmStorage.getFilms().stream()
+                .mapToLong(Film::getId)
+                .max()
+                .orElse(0) + 1;
     }
 }

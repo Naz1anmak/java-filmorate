@@ -153,7 +153,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void shouldUpdateValidFilm() throws Exception {
+    void shouldUpdateValidUser() throws Exception {
         String createdUserContent = mockMvc.perform(post("/users")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(user)))
