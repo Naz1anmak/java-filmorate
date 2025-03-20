@@ -9,13 +9,15 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
 public class User {
-    int id;
+    Long id;
 
     @NotNull
     @NotBlank(message = "Email не должен быть пустым")
@@ -33,7 +35,9 @@ public class User {
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     LocalDate birthday;
 
-    public User(int id, String email, String login, String name, LocalDate birthday) {
+    final Set<Long> friends = new HashSet<>();
+
+    public User(Long id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
         this.email = email;
         this.login = login;

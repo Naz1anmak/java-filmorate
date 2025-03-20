@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.controller.film;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
@@ -57,7 +57,7 @@ class FilmControllerTest {
 
     @Test
     void shouldCreateValidFilmWithId() throws Exception {
-        Film filmWithId = film.toBuilder().id(1).build();
+        Film filmWithId = film.toBuilder().id(1L).build();
 
         mockMvc.perform(post("/films")
                         .contentType("application/json")
@@ -78,7 +78,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name").value("Название не должно быть пустым"));
+                .andExpect(jsonPath("$.fields.name").value("Название не должно быть пустым"));
     }
 
     @Test
@@ -88,7 +88,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.description").value("Максимальная длина описания — 200 символов"));
+                .andExpect(jsonPath("$.fields.description").value("Максимальная длина описания — 200 символов"));
     }
 
     @Test
@@ -98,7 +98,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.releaseDate").value("Дата релиза не должна быть раньше 28 декабря 1895 года"));
+                .andExpect(jsonPath("$.fields.releaseDate").value("Дата релиза не должна быть раньше 28 декабря 1895 года"));
     }
 
     @Test
@@ -109,7 +109,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.duration").value("Продолжительность фильма должна быть положительным числом"));
+                .andExpect(jsonPath("$.fields.duration").value("Продолжительность фильма должна быть положительным числом"));
     }
 
     @Test
@@ -120,7 +120,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.duration").value("Продолжительность фильма должна быть положительным числом"));
+                .andExpect(jsonPath("$.fields.duration").value("Продолжительность фильма должна быть положительным числом"));
     }
 
     @Test
@@ -129,7 +129,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(film)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Фильм с id " + film.getId() + " не найден"));
+                .andExpect(jsonPath("$.description").value("Фильм с id " + film.getId() + " не найден"));
 
     }
 
@@ -146,10 +146,10 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name").value("Название не должно быть пустым"))
-                .andExpect(jsonPath("$.description").value("Максимальная длина описания — 200 символов"))
-                .andExpect(jsonPath("$.releaseDate").value("Дата релиза не должна быть раньше 28 декабря 1895 года"))
-                .andExpect(jsonPath("$.duration").value("Продолжительность фильма должна быть положительным числом"));
+                .andExpect(jsonPath("$.fields.name").value("Название не должно быть пустым"))
+                .andExpect(jsonPath("$.fields.description").value("Максимальная длина описания — 200 символов"))
+                .andExpect(jsonPath("$.fields.releaseDate").value("Дата релиза не должна быть раньше 28 декабря 1895 года"))
+                .andExpect(jsonPath("$.fields.duration").value("Продолжительность фильма должна быть положительным числом"));
     }
 
     @Test
@@ -177,6 +177,26 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$.description").value(filmUpdate.getDescription()))
                 .andExpect(jsonPath("$.releaseDate").value(filmUpdate.getReleaseDate().toString()))
                 .andExpect(jsonPath("$.duration").value(filmUpdate.getDuration()));
+    }
+
+    @Test
+    void shouldReturnCorrectFilm() throws Exception {
+        String createdFilmContent = mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Film createdFilm = objectMapper.readValue(createdFilmContent, Film.class);
+
+        mockMvc.perform(get("/films/" + createdFilm.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(createdFilm.getId()))
+                .andExpect(jsonPath("$.name").value(createdFilm.getName()))
+                .andExpect(jsonPath("$.description").value(createdFilm.getDescription()))
+                .andExpect(jsonPath("$.releaseDate").value(createdFilm.getReleaseDate().toString()))
+                .andExpect(jsonPath("$.duration").value(createdFilm.getDuration()));
     }
 
     @Test
