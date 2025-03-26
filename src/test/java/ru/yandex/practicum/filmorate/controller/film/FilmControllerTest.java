@@ -8,10 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.FilmGenre;
+import ru.yandex.practicum.filmorate.model.film.MpaRating;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,6 +43,8 @@ class FilmControllerTest {
                 .description("Great movie")
                 .releaseDate(LocalDate.of(2014, 11, 7))
                 .duration(169)
+                .genres(Collections.singleton(FilmGenre.DRAMA))
+                .mpaRating(MpaRating.PG_13)
                 .build();
     }
 
@@ -52,7 +58,8 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$.name").value(film.getName()))
                 .andExpect(jsonPath("$.description").value(film.getDescription()))
                 .andExpect(jsonPath("$.releaseDate").value(film.getReleaseDate().toString()))
-                .andExpect(jsonPath("$.duration").value(film.getDuration()));
+                .andExpect(jsonPath("$.genres", hasItem("DRAMA")))
+                .andExpect(jsonPath("$.mpaRating").value(film.getMpaRating().toString()));
     }
 
     @Test
@@ -67,7 +74,9 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$.name").value(filmWithId.getName()))
                 .andExpect(jsonPath("$.description").value(filmWithId.getDescription()))
                 .andExpect(jsonPath("$.releaseDate").value(filmWithId.getReleaseDate().toString()))
-                .andExpect(jsonPath("$.duration").value(filmWithId.getDuration()));
+                .andExpect(jsonPath("$.duration").value(filmWithId.getDuration()))
+                .andExpect(jsonPath("$.genres", hasItem("DRAMA")))
+                .andExpect(jsonPath("$.mpaRating").value(film.getMpaRating().toString()));
     }
 
     @Test
@@ -196,7 +205,9 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$.name").value(createdFilm.getName()))
                 .andExpect(jsonPath("$.description").value(createdFilm.getDescription()))
                 .andExpect(jsonPath("$.releaseDate").value(createdFilm.getReleaseDate().toString()))
-                .andExpect(jsonPath("$.duration").value(createdFilm.getDuration()));
+                .andExpect(jsonPath("$.duration").value(createdFilm.getDuration()))
+                .andExpect(jsonPath("$.genres", hasItem("DRAMA")))
+                .andExpect(jsonPath("$.mpaRating").value(film.getMpaRating().toString()));
     }
 
     @Test

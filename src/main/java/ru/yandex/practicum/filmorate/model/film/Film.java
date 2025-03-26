@@ -1,7 +1,6 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.film;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
@@ -22,7 +21,6 @@ import java.util.Set;
 public class Film {
     Long id;
 
-    @NotNull
     @NotBlank(message = "Название не должно быть пустым")
     String name;
 
@@ -35,5 +33,11 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     int duration;
 
-    final Set<Long> movieRatings = new HashSet<>();
+    //@NotEmpty(message = "Фильм должен иметь хотя бы один жанр")
+    Set<FilmGenre> genres;
+
+    //@NotNull(message = "Фильм должен иметь возрастное ограничение")
+    MpaRating mpaRating;
+
+    final Set<Long> movieRating = new HashSet<>();
 }
