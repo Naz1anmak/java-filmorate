@@ -7,13 +7,12 @@ import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
-    private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM users WHERE email = ?";
+//    private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM users WHERE email = ?";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
     private static final String INSERT_QUERY = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ? birthday = ?" +
@@ -49,13 +48,11 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     @Override
     public Collection<User> getUsers() {
-        return List.of(
-                findMany(FIND_ALL_QUERY).toArray(new User[0])
-        );
+        return findMany(FIND_ALL_QUERY);
     }
 
     @Override
     public Optional<User> findById(Long userId) {
-        return Optional.empty();
+        return findOne(FIND_BY_ID_QUERY, userId);
     }
 }
