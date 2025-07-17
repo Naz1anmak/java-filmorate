@@ -1,38 +1,57 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-@RequiredArgsConstructor
-public class UserDbStorage implements UserStorage {
-    protected final JdbcTemplate jdbc;
-    protected final RowMapper<User> mapper;
+public class UserDbStorage extends BaseRepository<User> implements UserStorage {
+    private static final String FIND_ALL_QUERY = "SELECT * FROM users";
+    private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM users WHERE email = ?";
+    private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
+    private static final String INSERT_QUERY = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
+    private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ? birthday = ?" +
+            " WHERE user_id = ?";
+
+    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
+        super(jdbc, mapper);
+    }
 
     @Override
     public User create(User user) {
-        return null;
+        long id = insert(INSERT_QUERY,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday()
+        );
+        user.setId(id);
+        return user;
     }
 
     @Override
     public User update(User user) {
-        return null;
+        update(
+                UPDATE_QUERY,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday()
+        );
+        return user;
     }
 
     @Override
     public Collection<User> getUsers() {
-        return List.of();
+        return List.of(
+                findMany(FIND_ALL_QUERY).toArray(new User[0])
+        );
     }
 
     @Override
