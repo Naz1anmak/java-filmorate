@@ -11,8 +11,6 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -33,9 +31,8 @@ public class User {
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     LocalDate birthday;
 
-    final Set<Long> friends = new HashSet<>();
-
-    FriendshipStatus friendshipStatus = FriendshipStatus.PENDING;
+//    final Set<Long> friends = new HashSet<>();
+//    FriendshipStatus friendshipStatus = FriendshipStatus.PENDING;
 
     @Builder(toBuilder = true)
     public User(Long id, String email, String login, String name, LocalDate birthday) {

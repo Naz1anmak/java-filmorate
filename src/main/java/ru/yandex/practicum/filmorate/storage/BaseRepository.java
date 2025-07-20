@@ -55,12 +55,10 @@ public class BaseRepository<T> {
 
         Long id = keyHolder.getKeyAs(Long.class);
 
-        // Возвращаем id нового пользователя
         if (id != null) {
             return id;
         } else {
             throw new InternalServerException("Не удалось сохранить данные");
         }
     }
-
 }
