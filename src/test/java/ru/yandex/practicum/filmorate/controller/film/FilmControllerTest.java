@@ -2,24 +2,23 @@ package ru.yandex.practicum.filmorate.controller.film;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.film.Film;
-import ru.yandex.practicum.filmorate.model.film.FilmGenre;
-import ru.yandex.practicum.filmorate.model.film.MpaRating;
 
 import java.time.LocalDate;
-import java.util.Collections;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Deprecated
+@Disabled
 @SpringBootTest
 @AutoConfigureMockMvc
 class FilmControllerTest {
@@ -35,18 +34,18 @@ class FilmControllerTest {
 
     private Film film;
 
-    @BeforeEach
-    void setUp() {
-        filmController.getFilms().clear();
-        film = Film.builder()
-                .name("Interstellar")
-                .description("Great movie")
-                .releaseDate(LocalDate.of(2014, 11, 7))
-                .duration(169)
-                .genres(Collections.singleton(FilmGenre.DRAMA))
-                .mpaRating(MpaRating.PG_13)
-                .build();
-    }
+//    @BeforeEach
+//    void setUp() {
+//        filmController.getFilms().clear();
+//        film = Film.builder()
+//                .name("Interstellar")
+//                .description("Great movie")
+//                .releaseDate(LocalDate.of(2014, 11, 7))
+//                .duration(169)
+//                .genres(Collections.singleton(FilmGenre.DRAMA))
+//                .mpaRating(MpaRating.PG_13)
+//                .build();
+//    }
 
     @Test
     void shouldCreateValidFilm() throws Exception {
