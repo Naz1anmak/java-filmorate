@@ -82,11 +82,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             throw new NotFoundException("Фильм не найден");
         }
 
-        jdbc.update(DELETE_FILM_GENRES_QUERY, updated);
+        jdbc.update(DELETE_FILM_GENRES_QUERY, film.getId());
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 try {
-                    jdbc.update(INSERT_FILM_GENRES_QUERY, updated, genre.getId());
+                    jdbc.update(INSERT_FILM_GENRES_QUERY, film.getId(), genre.getId());
                 } catch (DuplicateKeyException ignored) {
                     log.warn("Попытка добавить дублирующийся жанр {} для фильма {}", genre.getName(), film.getName());
                 }
