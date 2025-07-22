@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.mappers;
 
 import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.film.Film;
@@ -14,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
+@Primary
 @AllArgsConstructor
 public class FilmRowMapper implements RowMapper<Film> {
     private final MpaRepository mpaRepository;

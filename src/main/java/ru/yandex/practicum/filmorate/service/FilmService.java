@@ -27,7 +27,6 @@ public class FilmService {
     private final GenreRepository genreRepository;
     private final LikeRepository likeRepository;
 
-
     @Autowired
     public FilmService(UserService userService, @Qualifier("filmDbStorage") FilmStorage filmStorage,
                        MpaRepository mpaRepository, GenreRepository genreRepository, LikeRepository likeRepository) {
@@ -39,49 +38,17 @@ public class FilmService {
     }
 
     public Film create(Film film) {
-        film = film.toBuilder().build();
-
-        Film finalFilm = film;
-        MpaRating mpa = mpaRepository.findById(film.getMpaRating().getId())
-                .orElseThrow(() -> new NotFoundException("MPA с id=" + finalFilm.getMpaRating().getId() + " не найден"));
-
-        if (film.getGenres() != null) {
-            for (Genre g : film.getGenres()) {
-                genreRepository.findById(g.getId())
-                        .orElseThrow(() -> new NotFoundException("Жанр с id=" + g.getId() + " не найден"));
-            }
-        }
-
-        film.setMpaRating(mpa);
-        film.setGenres(film.getGenres() == null ? Set.of() : film.getGenres());
-
+        validateAndChange(film);
         filmStorage.create(film);
         log.info("Добавлен новый фильм \"{}\" c id {}", film.getName(), film.getId());
         return film;
     }
 
     public Film update(Film film) {
-        Film oldFilm = filmStorage.getFilms().stream()
-                .filter(f -> f.getId().equals(film.getId()))
-                .findFirst()
-                .orElseThrow(() -> {
-                    log.error("Фильм с id {} не найден", film.getId());
-                    return new NotFoundException("Фильм с id " + film.getId() + " не найден");
-                });
+        filmStorage.findById(film.getId())
+                .orElseThrow(() -> new NotFoundException("Фильм с id=" + film.getId() + " не найден"));
 
-        MpaRating mpa = mpaRepository.findById(film.getMpaRating().getId())
-                .orElseThrow(() -> new NotFoundException("MPA с id=" + film.getMpaRating().getId() + " не найден"));
-
-        if (film.getGenres() != null) {
-            for (Genre g : film.getGenres()) {
-                genreRepository.findById(g.getId())
-                        .orElseThrow(() -> new NotFoundException("Жанр с id=" + g.getId() + " не найден"));
-            }
-        }
-
-        film.setMpaRating(mpa);
-        film.setGenres(film.getGenres() == null ? Set.of() : film.getGenres());
-
+        validateAndChange(film);
         filmStorage.update(film);
         log.info("Фильм c id {} обновлен", film.getId());
         return film;
@@ -121,5 +88,25 @@ public class FilmService {
 
     public List<Film> getTopFilms(int count) {
         return filmStorage.findTopFilms(count);
+    }
+
+    private Film validateAndChange(Film film) {
+        MpaRating mpa = mpaRepository.findById(film.getMpaRating().getId())
+                .orElseThrow(() -> new NotFoundException("MPA с id=" + film.getMpaRating().getId() + " не найден"));
+        film.setMpaRating(mpa);
+
+        Set<Genre> genres = film.getGenres() == null
+                ? Set.of()
+                : film.getGenres();
+
+        genres.forEach(g ->
+                genreRepository.findById(g.getId())
+                        .orElseThrow(() ->
+                                new NotFoundException("Жанр с id=" + g.getId() + " не найден")
+                        )
+        );
+        film.setGenres(genres);
+
+        return film;
     }
 }

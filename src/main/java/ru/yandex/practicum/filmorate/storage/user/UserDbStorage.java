@@ -59,6 +59,11 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     }
 
     @Override
+    public boolean delete(Long userId) {
+        return delete("DELETE FROM users WHERE user_id = ?", userId);
+    }
+
+    @Override
     public Collection<User> getUsers() {
         return findMany(FIND_ALL_QUERY);
     }

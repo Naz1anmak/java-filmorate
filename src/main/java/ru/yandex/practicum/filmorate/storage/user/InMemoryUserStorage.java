@@ -23,6 +23,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public boolean delete(Long userId) {
+        return false;
+    }
+
+    @Override
     public Collection<User> getUsers() {
         return users.values();
     }

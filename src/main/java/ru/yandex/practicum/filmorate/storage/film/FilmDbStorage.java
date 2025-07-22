@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -8,13 +9,16 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
+import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+@Slf4j
 @Repository
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
+    private final FilmRowMapper filmRowMapper;
+    private final GenreRepository genreRepository;
+    private final LikeRepository likeRepository;
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
     private static final String INSERT_QUERY = "INSERT INTO films (name, description, release_date, duration, mpa_rating_id) " +
@@ -31,8 +35,12 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     "ORDER BY likes_count DESC " +
                     "LIMIT ?";
 
-    public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
+    public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmRowMapper filmRowMapper,
+                         GenreRepository genreRepository, LikeRepository likeRepository) {
         super(jdbc, mapper);
+        this.filmRowMapper = filmRowMapper;
+        this.genreRepository = genreRepository;
+        this.likeRepository = likeRepository;
     }
 
     @Override
@@ -48,10 +56,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
         jdbc.update(DELETE_FILM_GENRES_QUERY, id);
         if (film.getGenres() != null) {
-            for (Genre g : film.getGenres()) {
+            for (Genre genre : film.getGenres()) {
                 try {
-                    jdbc.update(INSERT_FILM_GENRES_QUERY, id, g.getId());
+                    jdbc.update(INSERT_FILM_GENRES_QUERY, id, genre.getId());
                 } catch (DuplicateKeyException ignored) {
+                    log.warn("Попытка добавить дублирующийся жанр {} для фильма {}", genre.getName(), film.getName());
                 }
             }
         }
@@ -73,11 +82,14 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             throw new NotFoundException("Фильм не найден");
         }
 
-        jdbc.update(DELETE_FILM_GENRES_QUERY, film.getId());
+        jdbc.update(DELETE_FILM_GENRES_QUERY, updated);
         if (film.getGenres() != null) {
-            for (Genre g : film.getGenres()) {
-                jdbc.update(INSERT_FILM_GENRES_QUERY,
-                        film.getId(), g.getId());
+            for (Genre genre : film.getGenres()) {
+                try {
+                    jdbc.update(INSERT_FILM_GENRES_QUERY, updated, genre.getId());
+                } catch (DuplicateKeyException ignored) {
+                    log.warn("Попытка добавить дублирующийся жанр {} для фильма {}", genre.getName(), film.getName());
+                }
             }
         }
         return film;
@@ -85,7 +97,25 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public Collection<Film> getFilms() {
-        return findMany(FIND_ALL_QUERY);
+        List<Film> films = jdbc.query(FIND_ALL_QUERY, filmRowMapper);
+        if (films.isEmpty()) {
+            return films;
+        }
+
+        List<Long> filmIds = films.stream()
+                .map(Film::getId)
+                .toList();
+
+        Map<Long, Set<Genre>> genresByFilm = genreRepository.findByFilmIds(filmIds);
+        Map<Long, Set<Long>> likesByFilm = likeRepository.findByFilmIds(filmIds);
+
+        films.forEach(f -> {
+            f.setGenres(genresByFilm.getOrDefault(f.getId(), Set.of()));
+            f.getMovieRating().clear();
+            f.getMovieRating().addAll(likesByFilm.getOrDefault(f.getId(), Set.of()));
+        });
+
+        return films;
     }
 
     @Override
