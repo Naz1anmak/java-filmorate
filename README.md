@@ -44,8 +44,12 @@
 ### - Получение топ-10 фильмов по лайкам
 
 ```sql
-INSERT INTO film (film_id, name, description, release_date, duration, mpa_rating_id)
-VALUES (1, 'Матрица', 'Фантастический боевик', '1999-03-31', 136, 5);
+SELECT f.name, COUNT(ul.user_id) AS likes
+FROM film f
+LEFT JOIN user_like ul ON f.film_id = ul.film_id
+GROUP BY f.film_id
+ORDER BY likes DESC
+LIMIT 10;
 ```
 
 ### - Поиск всех друзей пользователя

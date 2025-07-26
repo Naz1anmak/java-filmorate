@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model.film;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+@Deprecated
 public enum FilmGenre {
     COMEDY,
     DRAMA,

@@ -2,49 +2,53 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.MpaRating;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.GenreRepository;
+import ru.yandex.practicum.filmorate.storage.film.LikeRepository;
+import ru.yandex.practicum.filmorate.storage.film.MpaRepository;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
 public class FilmService {
     private final UserService userService;
     private final FilmStorage filmStorage;
+    private final MpaRepository mpaRepository;
+    private final GenreRepository genreRepository;
+    private final LikeRepository likeRepository;
 
     @Autowired
-    public FilmService(UserService userService, FilmStorage filmStorage) {
+    public FilmService(UserService userService, @Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       MpaRepository mpaRepository, GenreRepository genreRepository, LikeRepository likeRepository) {
         this.userService = userService;
         this.filmStorage = filmStorage;
+        this.mpaRepository = mpaRepository;
+        this.genreRepository = genreRepository;
+        this.likeRepository = likeRepository;
     }
 
     public Film create(Film film) {
-        film = film.toBuilder()
-                .id(getNextId())
-                .build();
-
+        validateAndChange(film);
         filmStorage.create(film);
         log.info("Добавлен новый фильм \"{}\" c id {}", film.getName(), film.getId());
         return film;
     }
 
     public Film update(Film film) {
-        Film oldFilm = filmStorage.getFilms().stream()
-                .filter(f -> f.getId().equals(film.getId()))
-                .findFirst()
-                .orElseThrow(() -> {
-                    log.error("Фильм с id {} не найден", film.getId());
-                    return new NotFoundException("Фильм с id " + film.getId() + " не найден");
-                });
+        filmStorage.findById(film.getId())
+                .orElseThrow(() -> new NotFoundException("Фильм с id=" + film.getId() + " не найден"));
 
-        film.getMovieRating().addAll(oldFilm.getMovieRating());
-
+        validateAndChange(film);
         filmStorage.update(film);
         log.info("Фильм c id {} обновлен", film.getId());
         return film;
@@ -64,11 +68,12 @@ public class FilmService {
                 .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден"));
         User user = userService.findById(userId);
 
-        if (film.getMovieRating().contains(userId)) {
+        Set<Long> likes = likeRepository.findLikesByFilm(filmId);
+        if (likes.contains(userId)) {
             throw new IllegalArgumentException("Пользователь уже ставил лайк этому фильму");
         }
 
-        film.getMovieRating().add(userId);
+        likeRepository.addLike(filmId, userId);
         log.info("Пользователь {} поставил лайк фильму \"{}\"", user.getName(), film.getName());
     }
 
@@ -77,21 +82,31 @@ public class FilmService {
                 .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден"));
         User user = userService.findById(userId);
 
-        film.getMovieRating().remove(userId);
+        likeRepository.deleteLike(filmId, userId);
         log.info("Пользователь {} удалил лайк фильму \"{}\"", user.getName(), film.getName());
     }
 
     public List<Film> getTopFilms(int count) {
-        return filmStorage.getFilms().stream()
-                .sorted(Comparator.comparingInt((Film film) -> film.getMovieRating().size()).reversed())
-                .limit(count)
-                .toList();
+        return filmStorage.findTopFilms(count);
     }
 
-    private long getNextId() {
-        return filmStorage.getFilms().stream()
-                .mapToLong(Film::getId)
-                .max()
-                .orElse(0) + 1;
+    private Film validateAndChange(Film film) {
+        MpaRating mpa = mpaRepository.findById(film.getMpaRating().getId())
+                .orElseThrow(() -> new NotFoundException("MPA с id=" + film.getMpaRating().getId() + " не найден"));
+        film.setMpaRating(mpa);
+
+        Set<Genre> genres = film.getGenres() == null
+                ? Set.of()
+                : film.getGenres();
+
+        genres.forEach(g ->
+                genreRepository.findById(g.getId())
+                        .orElseThrow(() ->
+                                new NotFoundException("Жанр с id=" + g.getId() + " не найден")
+                        )
+        );
+        film.setGenres(genres);
+
+        return film;
     }
 }

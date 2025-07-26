@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model.film;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -33,10 +34,9 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     int duration;
 
-    //@NotEmpty(message = "Фильм должен иметь хотя бы один жанр")
-    Set<FilmGenre> genres;
+    Set<Genre> genres;
 
-    //@NotNull(message = "Фильм должен иметь возрастное ограничение")
+    @JsonProperty("mpa")
     MpaRating mpaRating;
 
     final Set<Long> movieRating = new HashSet<>();
