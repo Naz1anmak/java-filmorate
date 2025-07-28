@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.film.Film;
 
 import java.util.*;
 
+@Deprecated
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();

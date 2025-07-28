@@ -15,6 +15,10 @@ import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreRepository;
 import ru.yandex.practicum.filmorate.storage.film.LikeRepository;
 import ru.yandex.practicum.filmorate.storage.film.MpaRepository;
+import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
+import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
+import ru.yandex.practicum.filmorate.storage.mappers.MpaRowMapper;
+import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
@@ -31,11 +35,10 @@ import static org.assertj.core.api.Assertions.assertThat;
         GenreRepository.class,
         LikeRepository.class,
         MpaRepository.class,
-        ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper.class,
-        ru.yandex.practicum.filmorate.storage.mappers.BaseFilmRowMapper.class,
-        ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper.class,
-        ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper.class,
-        ru.yandex.practicum.filmorate.storage.mappers.MpaRowMapper.class
+        UserRowMapper.class,
+        FilmRowMapper.class,
+        GenreRowMapper.class,
+        MpaRowMapper.class
 })
 class FilmoRateApplicationTests {
 

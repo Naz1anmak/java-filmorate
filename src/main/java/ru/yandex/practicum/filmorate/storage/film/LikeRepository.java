@@ -39,7 +39,9 @@ public class LikeRepository {
         String inSql = filmIds.stream().map(id -> "?").collect(Collectors.joining(","));
         String sql = "SELECT film_id, user_id FROM user_likes WHERE film_id IN (" + inSql + ")";
         List<LikeRow> rows = jdbc.query(sql,
-                (rs, rn) -> new LikeRow(rs.getLong("film_id"), rs.getLong("user_id")),
+                (rs, rn) -> new LikeRow(
+                        rs.getLong("film_id"),
+                        rs.getLong("user_id")),
                 filmIds.toArray()
         );
         return rows.stream()

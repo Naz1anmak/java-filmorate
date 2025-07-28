@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.MpaRating;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
@@ -18,6 +19,7 @@ import java.util.*;
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private final FilmRowMapper filmRowMapper;
     private final GenreRepository genreRepository;
+    private final MpaRepository mpaRepository;
     private final LikeRepository likeRepository;
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
@@ -36,10 +38,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     "LIMIT ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmRowMapper filmRowMapper,
-                         GenreRepository genreRepository, LikeRepository likeRepository) {
+                         GenreRepository genreRepository, MpaRepository mpaRepository, LikeRepository likeRepository) {
         super(jdbc, mapper);
         this.filmRowMapper = filmRowMapper;
         this.genreRepository = genreRepository;
+        this.mpaRepository = mpaRepository;
         this.likeRepository = likeRepository;
     }
 
@@ -107,10 +110,12 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 .toList();
 
         Map<Long, Set<Genre>> genresByFilm = genreRepository.findByFilmIds(filmIds);
+        Map<Long, MpaRating> mpaByFilm = mpaRepository.findByFilmIds(filmIds);
         Map<Long, Set<Long>> likesByFilm = likeRepository.findByFilmIds(filmIds);
 
         films.forEach(f -> {
             f.setGenres(genresByFilm.getOrDefault(f.getId(), Set.of()));
+            f.setMpaRating(mpaByFilm.get(f.getId()));
             f.getMovieRating().clear();
             f.getMovieRating().addAll(likesByFilm.getOrDefault(f.getId(), Set.of()));
         });
@@ -120,7 +125,25 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public Optional<Film> findById(Long filmId) {
-        return findOne(FIND_BY_ID_QUERY, filmId);
+        Optional<Film> film = findOne(FIND_BY_ID_QUERY, filmId);
+        if (film.isEmpty()) {
+            return film;
+        }
+
+        List<Long> filmIdList = List.of(filmId);
+
+        Map<Long, Set<Genre>> genresByFilm = genreRepository.findByFilmIds(filmIdList);
+        Map<Long, MpaRating> mpaByFilm = mpaRepository.findByFilmIds(filmIdList);
+        Map<Long, Set<Long>> likesByFilm = likeRepository.findByFilmIds(filmIdList);
+
+        film.ifPresent(f -> {
+            f.setGenres(genresByFilm.getOrDefault(f.getId(), Set.of()));
+            f.setMpaRating(mpaByFilm.get(f.getId()));
+            f.getMovieRating().clear();
+            f.getMovieRating().addAll(likesByFilm.getOrDefault(f.getId(), Set.of()));
+        });
+
+        return film;
     }
 
     @Override
