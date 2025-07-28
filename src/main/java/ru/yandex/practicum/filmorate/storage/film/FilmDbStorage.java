@@ -101,8 +101,27 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     @Override
     public Collection<Film> getFilms() {
         List<Film> films = jdbc.query(FIND_ALL_QUERY, filmRowMapper);
+        enrichFilms(films);
+        return films;
+    }
+
+    @Override
+    public Optional<Film> findById(Long filmId) {
+        Optional<Film> film = findOne(FIND_BY_ID_QUERY, filmId);
+        film.ifPresent(f -> enrichFilms(List.of(f)));
+        return film;
+    }
+
+    @Override
+    public List<Film> findTopFilms(int count) {
+        List<Film> films = jdbc.query(TOP_N_SQL, filmRowMapper, count);
+        enrichFilms(films);
+        return films;
+    }
+
+    private void enrichFilms(List<Film> films) {
         if (films.isEmpty()) {
-            return films;
+            return;
         }
 
         List<Long> filmIds = films.stream()
@@ -119,35 +138,5 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             f.getMovieRating().clear();
             f.getMovieRating().addAll(likesByFilm.getOrDefault(f.getId(), Set.of()));
         });
-
-        return films;
-    }
-
-    @Override
-    public Optional<Film> findById(Long filmId) {
-        Optional<Film> film = findOne(FIND_BY_ID_QUERY, filmId);
-        if (film.isEmpty()) {
-            return film;
-        }
-
-        List<Long> filmIdList = List.of(filmId);
-
-        Map<Long, Set<Genre>> genresByFilm = genreRepository.findByFilmIds(filmIdList);
-        Map<Long, MpaRating> mpaByFilm = mpaRepository.findByFilmIds(filmIdList);
-        Map<Long, Set<Long>> likesByFilm = likeRepository.findByFilmIds(filmIdList);
-
-        film.ifPresent(f -> {
-            f.setGenres(genresByFilm.getOrDefault(f.getId(), Set.of()));
-            f.setMpaRating(mpaByFilm.get(f.getId()));
-            f.getMovieRating().clear();
-            f.getMovieRating().addAll(likesByFilm.getOrDefault(f.getId(), Set.of()));
-        });
-
-        return film;
-    }
-
-    @Override
-    public List<Film> findTopFilms(int count) {
-        return jdbc.query(TOP_N_SQL, mapper, count);
     }
 }
