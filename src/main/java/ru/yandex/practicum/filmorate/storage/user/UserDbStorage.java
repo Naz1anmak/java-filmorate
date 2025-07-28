@@ -15,8 +15,8 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE user_id = ?";
     private static final String INSERT_QUERY = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ?" +
-            " WHERE user_id = ?";
+    private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? " +
+            "WHERE user_id = ?";
     private static final String INSERT_FRIENDSHIP_QUERY = "INSERT INTO friendship (user_id, friend_id, status) " +
             "VALUES (?, ?, 'PENDING')";
     public static final String DELETE_FRIENDSHIP_QUERY = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";

@@ -23,18 +23,20 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private final LikeRepository likeRepository;
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
-    private static final String INSERT_QUERY = "INSERT INTO films (name, description, release_date, duration, mpa_rating_id) " +
+    private static final String INSERT_QUERY = "INSERT INTO films (name, description, " +
+            "release_date, duration, mpa_rating_id) " +
             "VALUES (?, ?, ?, ?, ?)";
-    private static final String UPDATE_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_rating_id = ? " +
+    private static final String UPDATE_QUERY = "UPDATE films SET name = ?, description = ?, " +
+            "release_date = ?, duration = ?, mpa_rating_id = ? " +
             "WHERE film_id = ?";
     public static final String INSERT_FILM_GENRES_QUERY = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
     public static final String DELETE_FILM_GENRES_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
     private static final String TOP_N_SQL =
-            "SELECT f.*, COUNT(ul.user_id) AS likes_count " +
+            "SELECT f.* " +
                     "FROM films f " +
                     "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
                     "GROUP BY f.film_id " +
-                    "ORDER BY likes_count DESC " +
+                    "ORDER BY COUNT(ul.user_id) DESC " +
                     "LIMIT ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmRowMapper filmRowMapper,
