@@ -19,5 +19,5 @@ public interface FilmStorage {
 
     List<Film> findTopFilms(int count);
 
-    List<Film> findRecommendationsFilms(Long userId);
+    List<Film> findRecommendedFilms(Long userId);
 }

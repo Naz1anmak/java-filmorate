@@ -132,7 +132,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     @Transactional
-    public List<Film> findRecommendationsFilms(Long userId) {
+    public List<Film> findRecommendedFilms(Long userId) {
         String query = """
                 WITH user_likes_films_CTE AS (
                     SELECT film_id, user_id\s

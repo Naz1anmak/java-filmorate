@@ -91,9 +91,9 @@ public class FilmService {
 
     public List<Film> getRecommendations(Long userId) {
         userStorage.findById(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с идентификатором %s не найден", userId))
+                new NotFoundException("Пользователь с идентификатором " + userId + " не найден")
         );
-        return filmStorage.findRecommendationsFilms(userId);
+        return filmStorage.findRecommendedFilms(userId);
     }
 
     private Film validateAndChange(Film film) {
