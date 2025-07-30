@@ -38,6 +38,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     "GROUP BY f.film_id " +
                     "ORDER BY COUNT(ul.user_id) DESC " +
                     "LIMIT ?";
+    private static final String DELETE_FILM_BY_ID_QUERY = "DELETE FROM films WHERE film_id = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmRowMapper filmRowMapper,
                          GenreRepository genreRepository, MpaRepository mpaRepository, LikeRepository likeRepository) {
@@ -98,6 +99,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             }
         }
         return film;
+    }
+
+    @Override
+    public boolean delete(Long filmId) {
+        return delete(DELETE_FILM_BY_ID_QUERY, filmId);
     }
 
     @Override

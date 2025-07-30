@@ -23,6 +23,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public boolean delete(Long filmId) {
+        return films.remove(filmId) != null;
+    }
+
+    @Override
     public Optional<Film> findById(Long filmId) {
         return Optional.ofNullable(films.get(filmId));
     }

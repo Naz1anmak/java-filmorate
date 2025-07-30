@@ -28,6 +28,11 @@ public class UserController {
         return userService.update(user);
     }
 
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") Long userId) {
+        userService.delete(userId);
+    }
+
     @GetMapping("/{id}")
     public User findById(@PathVariable("id") Long userId) {
         return userService.findById(userId);
