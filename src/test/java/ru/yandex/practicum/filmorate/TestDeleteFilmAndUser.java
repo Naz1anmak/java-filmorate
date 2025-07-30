@@ -110,7 +110,7 @@ public class TestDeleteFilmAndUser {
                 .isPresent();
     }
 
-    // Тест удаления несуществующего фильма
+    // Тест удаления несуществующего фильма с id 999L
     @Test
     public void deleteFilm_shouldReturnFalseWhenFilmNotExists() {
         // Проверка, что фильма действительно нет
@@ -154,7 +154,7 @@ public class TestDeleteFilmAndUser {
                 .isPresent();
     }
 
-    // Тест удаления несуществующего пользователя
+    // Тест удаления несуществующего пользователя с id 999L
     @Test
     public void deleteUser_shouldReturnFalseWhenUserNotExists() {
         // Проверка, что пользователя действительно нет
