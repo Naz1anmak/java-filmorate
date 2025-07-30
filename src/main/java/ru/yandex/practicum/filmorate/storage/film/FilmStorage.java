@@ -11,6 +11,8 @@ public interface FilmStorage {
 
     Film update(Film film);
 
+    boolean delete(Long filmId);
+
     Collection<Film> getFilms();
 
     Optional<Film> findById(Long filmId);
@@ -18,4 +20,6 @@ public interface FilmStorage {
     List<Film> findTopFilms(int count);
 
     boolean existsById(Long filmId);
+
+    List<Film> findRecommendedFilms(Long userId);
 }
