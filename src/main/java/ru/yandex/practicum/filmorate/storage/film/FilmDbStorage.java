@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
@@ -14,6 +16,7 @@ import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
 import java.util.*;
 
+@Primary
 @Slf4j
 @Repository
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
@@ -24,20 +27,20 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
     private static final String INSERT_QUERY = "INSERT INTO films (name, description, " +
-            "release_date, duration, mpa_rating_id) " +
-            "VALUES (?, ?, ?, ?, ?)";
+                                               "release_date, duration, mpa_rating_id) " +
+                                               "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE films SET name = ?, description = ?, " +
-            "release_date = ?, duration = ?, mpa_rating_id = ? " +
-            "WHERE film_id = ?";
+                                               "release_date = ?, duration = ?, mpa_rating_id = ? " +
+                                               "WHERE film_id = ?";
     public static final String INSERT_FILM_GENRES_QUERY = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
     public static final String DELETE_FILM_GENRES_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
     private static final String TOP_N_SQL =
             "SELECT f.* " +
-                    "FROM films f " +
-                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-                    "GROUP BY f.film_id " +
-                    "ORDER BY COUNT(ul.user_id) DESC " +
-                    "LIMIT ?";
+            "FROM films f " +
+            "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+            "GROUP BY f.film_id " +
+            "ORDER BY COUNT(ul.user_id) DESC " +
+            "LIMIT ?";
     private static final String DELETE_FILM_BY_ID_QUERY = "DELETE FROM films WHERE film_id = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmRowMapper filmRowMapper,
@@ -123,6 +126,40 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     @Override
     public List<Film> findTopFilms(int count) {
         List<Film> films = jdbc.query(TOP_N_SQL, filmRowMapper, count);
+        enrichFilms(films);
+        return films;
+    }
+
+    @Override
+    @Transactional
+    public List<Film> findRecommendedFilms(Long userId) {
+        String query = """
+                WITH user_likes_films_CTE AS (
+                    SELECT film_id, user_id\s
+                    FROM user_likes\s
+                    WHERE user_id = ?),
+                most_similar_user_by_likes_films_CTE AS (
+                    SELECT ul1.user_id, count(*) AS total\s
+                    FROM user_likes ul1\s
+                    JOIN user_likes_films_CTE ul2 on ul2.film_id = ul1.film_id\s
+                    AND NOT ul2.user_id = ul1.user_id
+                    GROUP BY ul1.user_id\s
+                    ORDER BY total DESC\s
+                    LIMIT 1),
+                most_similar_user_likes_films_CTE AS (
+                    SELECT film_id, ul3.user_id\s
+                    FROM user_likes ul3
+                    JOIN most_similar_user_by_likes_films_CTE ul4 on ul3.user_id = ul4.user_id),
+                recommended_films_CTE AS (
+                    SELECT ul5.film_id\s
+                    FROM most_similar_user_likes_films_CTE ul5\s
+                    LEFT JOIN user_likes_films_CTE ul6 on ul6.film_id = ul5.film_id\s
+                    WHERE ul6.user_id IS NULL)
+                SELECT *
+                FROM films f
+                JOIN recommended_films_CTE ul7 on f.film_id = ul7.film_id
+                ORDER BY film_id""";
+        List<Film> films = jdbc.query(query, filmRowMapper, userId);
         enrichFilms(films);
         return films;
     }

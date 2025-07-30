@@ -106,8 +106,8 @@ public class UserService {
 
     private long getNextId() {
         return userStorage.getUsers().stream()
-                .mapToLong(User::getId)
-                .max()
-                .orElse(0) + 1;
+                       .mapToLong(User::getId)
+                       .max()
+                       .orElse(0) + 1;
     }
 }

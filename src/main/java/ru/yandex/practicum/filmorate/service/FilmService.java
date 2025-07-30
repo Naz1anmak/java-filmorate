@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
@@ -13,12 +12,14 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreRepository;
 import ru.yandex.practicum.filmorate.storage.film.LikeRepository;
 import ru.yandex.practicum.filmorate.storage.film.MpaRepository;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class FilmService {
     private final UserService userService;
@@ -26,16 +27,7 @@ public class FilmService {
     private final MpaRepository mpaRepository;
     private final GenreRepository genreRepository;
     private final LikeRepository likeRepository;
-
-    @Autowired
-    public FilmService(UserService userService, @Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       MpaRepository mpaRepository, GenreRepository genreRepository, LikeRepository likeRepository) {
-        this.userService = userService;
-        this.filmStorage = filmStorage;
-        this.mpaRepository = mpaRepository;
-        this.genreRepository = genreRepository;
-        this.likeRepository = likeRepository;
-    }
+    private final UserStorage userStorage;
 
     public Film create(Film film) {
         validateAndChange(film);
@@ -95,6 +87,13 @@ public class FilmService {
 
     public List<Film> getTopFilms(int count) {
         return filmStorage.findTopFilms(count);
+    }
+
+    public List<Film> getRecommendations(Long userId) {
+        userStorage.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь с идентификатором " + userId + " не найден")
+        );
+        return filmStorage.findRecommendedFilms(userId);
     }
 
     private Film validateAndChange(Film film) {
