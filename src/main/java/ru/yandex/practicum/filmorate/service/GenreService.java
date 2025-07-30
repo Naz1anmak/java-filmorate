@@ -17,7 +17,7 @@ public class GenreService {
         return genreRepository.findAll();
     }
 
-    public Genre getGenreById(int id) {
+    public Genre getGenreById(long id) {
         return genreRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Жанр с id=" + id + " не найден"));
     }

@@ -4,23 +4,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.model.film.MpaRating;
 import ru.yandex.practicum.filmorate.model.user.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.GenreRepository;
-import ru.yandex.practicum.filmorate.storage.film.LikeRepository;
-import ru.yandex.practicum.filmorate.storage.film.MpaRepository;
+import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class FilmService {
     private final UserService userService;
     private final FilmStorage filmStorage;
@@ -28,6 +27,7 @@ public class FilmService {
     private final GenreRepository genreRepository;
     private final LikeRepository likeRepository;
     private final UserStorage userStorage;
+    private final DirectorRepository directorRepository;
 
     public Film create(Film film) {
         validateAndChange(film);
@@ -101,17 +101,15 @@ public class FilmService {
                 .orElseThrow(() -> new NotFoundException("MPA с id=" + film.getMpaRating().getId() + " не найден"));
         film.setMpaRating(mpa);
 
-        Set<Genre> genres = film.getGenres() == null
-                ? Set.of()
-                : film.getGenres();
-
-        genres.forEach(g ->
-                genreRepository.findById(g.getId())
-                        .orElseThrow(() ->
-                                new NotFoundException("Жанр с id=" + g.getId() + " не найден")
-                        )
-        );
+        Set<Genre> genres = Optional.ofNullable(film.getGenres()).orElse(Set.of());
+        genres.forEach(g -> genreRepository.findById(g.getId())
+                .orElseThrow(() -> new NotFoundException("Жанр с id=" + g.getId() + " не найден")));
         film.setGenres(genres);
+
+        Set<Director> directors = Optional.ofNullable(film.getDirectors()).orElse(Set.of());
+        directors.forEach(d -> directorRepository.findById(d.getId())
+                .orElseThrow(() -> new NotFoundException("Режиссер с id=" + d.getId() + " не найден")));
+        film.setDirectors(directors);
 
         return film;
     }
