@@ -33,6 +33,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public boolean existsById(Long filmId) {
+        return false;
+    }
+
+    @Override
     public Collection<Film> getFilms() {
         return films.values();
     }
