@@ -16,11 +16,11 @@ public class ReviewsStorage extends BaseRepository<Reviews> {
         super(jdbc, mapper);
     }
 
-    private static final String INSERT_REVIEW = "INSERT INTO reviews (userId, filmId, content, isPositive, useful)VALUES (?, ?, ?, ?, 0)";
+    private static final String INSERT_REVIEW = "INSERT INTO reviews (user_id, film_id, content, is_positive, useful) VALUES (?, ?, ?, ?, 0)";
 
     private static final String UPDATE_REVIEW = """
     UPDATE reviews
-    SET content = ?, isPositive = ?
+    SET content = ?, is_positive = ?
     WHERE id = ?
 """;
 
