@@ -28,6 +28,11 @@ public class FilmController {
         return filmService.update(film);
     }
 
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") Long filmId) {
+        filmService.delete(filmId);
+    }
+
     @GetMapping("/{id}")
     public Film findById(@PathVariable("id") Long filmId) {
         return filmService.findById(filmId);

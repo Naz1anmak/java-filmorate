@@ -11,6 +11,8 @@ public interface FilmStorage {
 
     Film update(Film film);
 
+    boolean delete(Long filmId);
+
     Collection<Film> getFilms();
 
     Optional<Film> findById(Long filmId);
