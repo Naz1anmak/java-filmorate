@@ -20,7 +20,7 @@ public class MpaRepository extends BaseRepository<MpaRating> {
         super(jdbc, mapper);
     }
 
-    public Optional<MpaRating> findById(int id) {
+    public Optional<MpaRating> findById(long id) {
         return findOne(FIND_BY_ID, id);
     }
 
