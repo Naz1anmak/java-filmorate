@@ -96,7 +96,13 @@ public class FilmService {
         return filmStorage.findRecommendedFilms(userId);
     }
 
-    private Film validateAndChange(Film film) {
+    public List<Film> getFilmsByDirector(Long directorId, String sortBy) {
+        directorRepository.findById(directorId)
+                .orElseThrow(() -> new NotFoundException("Режиссер с id=" + directorId + " не найден"));
+        return filmStorage.findByDirectorSorted(directorId, sortBy);
+    }
+
+    private void validateAndChange(Film film) {
         MpaRating mpa = mpaRepository.findById(film.getMpaRating().getId())
                 .orElseThrow(() -> new NotFoundException("MPA с id=" + film.getMpaRating().getId() + " не найден"));
         film.setMpaRating(mpa);
@@ -110,7 +116,5 @@ public class FilmService {
         directors.forEach(d -> directorRepository.findById(d.getId())
                 .orElseThrow(() -> new NotFoundException("Режиссер с id=" + d.getId() + " не найден")));
         film.setDirectors(directors);
-
-        return film;
     }
 }
