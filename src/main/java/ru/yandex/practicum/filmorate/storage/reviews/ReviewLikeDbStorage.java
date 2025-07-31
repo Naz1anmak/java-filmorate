@@ -23,7 +23,7 @@ public class ReviewLikeDbStorage extends BaseRepository<ReviewLikes> {
         FROM review_likes
         WHERE review_id = ?
     )
-    WHERE id = ?
+    WHERE review_id = ?
 """;
 
     public void addLike(long reviewId, long userId) {

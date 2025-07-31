@@ -21,12 +21,12 @@ public class ReviewsStorage extends BaseRepository<Reviews> {
     private static final String UPDATE_REVIEW = """
     UPDATE reviews
     SET content = ?, is_positive = ?
-    WHERE id = ?
+    WHERE review_id = ?
 """;
 
-    private static final String DELETE_REVIEW = "DELETE FROM reviews WHERE id = ?";
+    private static final String DELETE_REVIEW = "DELETE FROM reviews WHERE review_id = ?";
 
-    private static final String GET_ID_REVIEW = "SELECT * FROM reviews WHERE id = ?";
+    private static final String GET_ID_REVIEW = "SELECT * FROM reviews WHERE review_id = ?";
 
     private static final String GET_REVIEW_FILM_ID = "SELECT * FROM reviews WHERE film_id = ? ORDER BY useful DESC LIMIT ?";
 

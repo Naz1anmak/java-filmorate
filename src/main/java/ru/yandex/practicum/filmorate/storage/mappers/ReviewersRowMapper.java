@@ -11,7 +11,7 @@ public class ReviewersRowMapper implements RowMapper<Reviews> {
     @Override
     public Reviews mapRow(ResultSet rs, int rowNum) throws SQLException {
         return Reviews.builder()
-                .id(rs.getLong("id"))
+                .id(rs.getLong("review_id"))
                 .userId(rs.getLong("user_id"))
                 .filmId(rs.getLong("film_id"))
                 .content(rs.getString("content"))

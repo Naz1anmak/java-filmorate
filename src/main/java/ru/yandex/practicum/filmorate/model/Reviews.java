@@ -1,4 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Reviews {
 
+    @JsonProperty("reviewId")
     private Long id;
     private Long userId;
     private Long filmId;
