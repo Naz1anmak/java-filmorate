@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Reviews;
+import ru.yandex.practicum.filmorate.model.review.Reviews;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.reviews.ReviewLikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.reviews.ReviewsStorage;
@@ -49,9 +49,9 @@ public class ReviewsService {
 
     public List<Reviews> findAll(Long filmId, int count) {
         if (filmId == null) {
-         return reviewsStorage.findAll(count);
+            return reviewsStorage.findAll(count);
         } else
-         return reviewsStorage.findByFilmId(filmId, count);
+            return reviewsStorage.findByFilmId(filmId, count);
     }
 
     public void addLike(long id, long userId) {

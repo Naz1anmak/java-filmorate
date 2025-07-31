@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.storage.reviews;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.ReviewLikes;
+import ru.yandex.practicum.filmorate.model.review.ReviewLikes;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
 @Repository
@@ -18,13 +18,13 @@ public class ReviewLikeDbStorage extends BaseRepository<ReviewLikes> {
     private static final String DELETE_LIKE = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ?";
 
     private static final String UPDATE_LIKE = """
-    UPDATE reviews SET useful = (
-        SELECT COALESCE(SUM(CASE WHEN is_like THEN 1 ELSE -1 END), 0)
-        FROM review_likes
-        WHERE review_id = ?
-    )
-    WHERE review_id = ?
-""";
+                UPDATE reviews SET useful = (
+                    SELECT COALESCE(SUM(CASE WHEN is_like THEN 1 ELSE -1 END), 0)
+                    FROM review_likes
+                    WHERE review_id = ?
+                )
+                WHERE review_id = ?
+            """;
 
     public void addLike(long reviewId, long userId) {
         jdbc.update(DELETE_LIKE, reviewId, userId);

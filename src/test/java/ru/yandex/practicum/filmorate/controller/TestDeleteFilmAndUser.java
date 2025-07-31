@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import ru.yandex.practicum.filmorate.model.film.*;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.MpaRating;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreRepository;
@@ -29,8 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Disabled
 @JdbcTest
 @AutoConfigureTestDatabase
-@Disabled
-@Deprecated
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({
         UserDbStorage.class,

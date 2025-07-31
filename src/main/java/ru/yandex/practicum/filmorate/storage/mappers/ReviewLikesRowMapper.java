@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.ReviewLikes;
+import ru.yandex.practicum.filmorate.model.review.ReviewLikes;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

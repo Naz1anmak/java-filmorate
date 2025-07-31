@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.review;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
