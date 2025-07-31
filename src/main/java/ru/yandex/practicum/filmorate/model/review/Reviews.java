@@ -1,4 +1,5 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.review;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,5 +29,5 @@ public class Reviews {
     @NotNull(message = "isPositive не должен быть null")
     private Boolean isPositive;
 
-    private long useful = 0; // по умолчанию 0, как в БД
+    private long useful = 0;
 }

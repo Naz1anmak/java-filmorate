@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.mappers;
 
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Reviews;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.review.Reviews;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

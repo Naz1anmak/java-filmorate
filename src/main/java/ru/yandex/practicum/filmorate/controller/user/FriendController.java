@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.controller.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -10,13 +10,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users/{id}/friends")
+@RequiredArgsConstructor
 public class FriendController {
     private final UserService userService;
-
-    @Autowired
-    public FriendController(UserService userService) {
-        this.userService = userService;
-    }
 
     @PutMapping("/{friendId}")
     public void addFriend(@PathVariable("id") Long userId,

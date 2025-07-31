@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.controller.reviews;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Reviews;
+import ru.yandex.practicum.filmorate.model.review.Reviews;
 import ru.yandex.practicum.filmorate.service.ReviewsService;
 
 import java.util.List;

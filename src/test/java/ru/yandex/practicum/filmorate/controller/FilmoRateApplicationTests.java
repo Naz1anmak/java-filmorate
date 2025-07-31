@@ -28,7 +28,6 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
-@Deprecated
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)

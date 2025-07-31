@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -14,28 +13,18 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
 
-    @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
-
     public User create(User user) {
-        user = user.toBuilder()
-                .id(getNextId())
-                .build();
-
         userStorage.create(user);
         log.info("Добавлен новый юзер \"{}\" c id {}", user.getLogin(), user.getId());
         return user;
     }
 
     public User update(User user) {
-        User oldUser = userStorage.getUsers().stream()
-                .filter(u -> u.getId().equals(user.getId()))
-                .findFirst()
+        userStorage.findById(user.getId())
                 .orElseThrow(() -> {
                     log.error("Юзер с id {} не найден", user.getId());
                     return new NotFoundException("Юзер с id " + user.getId() + " не найден");
@@ -91,9 +80,8 @@ public class UserService {
     }
 
     public List<User> commonFriends(Long userId, Long friendId) {
-        User user = findById(userId);
-        User friend = findById(friendId);
-
+        findById(userId);
+        findById(friendId);
         return userStorage.getCommonFriends(userId, friendId);
     }
 
@@ -102,12 +90,5 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
 
         return userStorage.getFriends(userId);
-    }
-
-    private long getNextId() {
-        return userStorage.getUsers().stream()
-                       .mapToLong(User::getId)
-                       .max()
-                       .orElse(0) + 1;
     }
 }

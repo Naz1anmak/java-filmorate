@@ -46,9 +46,9 @@ public class MpaRepository extends BaseRepository<MpaRating> {
 
         return rows.stream()
                 .collect(Collectors.toMap(
-                MpaRow::getFilmId,
-                MpaRow::getMpaRating
-        ));
+                        MpaRow::getFilmId,
+                        MpaRow::getMpaRating
+                ));
     }
 
     private static class MpaRow {

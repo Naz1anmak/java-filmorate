@@ -17,7 +17,7 @@ public class MpaService {
         return mpaRepository.findAll();
     }
 
-    public MpaRating getMpaById(int id) {
+    public MpaRating getMpaById(long id) {
         return mpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("MPA с id=" + id + " не найден"));
     }

@@ -39,5 +39,7 @@ public class Film {
     @JsonProperty("mpa")
     MpaRating mpaRating;
 
+    Set<Director> directors;
+
     final Set<Long> movieRating = new HashSet<>();
 }

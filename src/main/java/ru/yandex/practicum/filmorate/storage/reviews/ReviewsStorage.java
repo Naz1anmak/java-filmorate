@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.storage.reviews;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.Reviews;
+import ru.yandex.practicum.filmorate.model.review.Reviews;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
 import java.util.List;
@@ -19,10 +19,10 @@ public class ReviewsStorage extends BaseRepository<Reviews> {
     private static final String INSERT_REVIEW = "INSERT INTO reviews (user_id, film_id, content, is_positive, useful) VALUES (?, ?, ?, ?, 0)";
 
     private static final String UPDATE_REVIEW = """
-    UPDATE reviews
-    SET content = ?, is_positive = ?
-    WHERE review_id = ?
-""";
+                UPDATE reviews
+                SET content = ?, is_positive = ?
+                WHERE review_id = ?
+            """;
 
     private static final String DELETE_REVIEW = "DELETE FROM reviews WHERE review_id = ?";
 
@@ -66,6 +66,6 @@ public class ReviewsStorage extends BaseRepository<Reviews> {
     }
 
     public boolean existsById(Long id) {
-            return findById(id).isPresent();
-        }
+        return findById(id).isPresent();
     }
+}

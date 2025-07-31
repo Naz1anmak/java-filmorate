@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.controller.film;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -9,13 +9,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmRatingsController {
     private final FilmService filmService;
-
-    @Autowired
-    public FilmRatingsController(FilmService filmService) {
-        this.filmService = filmService;
-    }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable("id") Long filmId,

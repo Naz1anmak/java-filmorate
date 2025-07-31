@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -11,25 +10,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-@Primary
 @Repository
 public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE user_id = ?";
     private static final String INSERT_QUERY = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? " +
-                                               "WHERE user_id = ?";
+            "WHERE user_id = ?";
     private static final String INSERT_FRIENDSHIP_QUERY = "INSERT INTO friendship (user_id, friend_id, status) " +
-                                                          "VALUES (?, ?, 'PENDING')";
+            "VALUES (?, ?, 'PENDING')";
     public static final String DELETE_FRIENDSHIP_QUERY = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";
     public static final String FIND_FRIENDS_QUERY = "SELECT u.* FROM users u " +
-                                                    "JOIN friendship f ON u.user_id = f.friend_id " +
-                                                    "WHERE f.user_id = ?";
+            "JOIN friendship f ON u.user_id = f.friend_id " +
+            "WHERE f.user_id = ?";
     public static final String FIND_COMMON_FRIENDS_QUERY = "SELECT u.* FROM users u " +
-                                                           "JOIN friendship f1 ON u.user_id = f1.friend_id " +
-                                                           "JOIN friendship f2 ON u.user_id = f2.friend_id " +
-                                                           "WHERE f1.user_id = ? AND f2.user_id = ?";
-    private static final String DELETE_USER_BY_ID_QUERY = "DELETE FROM users WHERE user_id = ?";
+            "JOIN friendship f1 ON u.user_id = f1.friend_id " +
+            "JOIN friendship f2 ON u.user_id = f2.friend_id " +
+            "WHERE f1.user_id = ? AND f2.user_id = ?";
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE user_id = ?";
 
     public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
@@ -62,7 +60,7 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     @Override
     public boolean delete(Long userId) {
-        return delete("DELETE FROM users WHERE user_id = ?", userId);
+        return delete(DELETE_USER_QUERY, userId);
     }
 
     @Override
@@ -103,7 +101,7 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     @Override
     public void confirmFriendship(Long userId, Long friendId) {
         jdbc.update("UPDATE friendship SET status = 'CONFIRMED' " +
-                    "WHERE user_id = ? AND friend_id = ?", userId, friendId);
+                "WHERE user_id = ? AND friend_id = ?", userId, friendId);
     }
 
     @Override

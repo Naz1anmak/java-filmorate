@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
     private final FilmService filmService;
@@ -47,5 +47,4 @@ public class UserController {
     public List<Film> getRecommendations(@PathVariable("id") Long userId) {
         return filmService.getRecommendations(userId);
     }
-
 }
