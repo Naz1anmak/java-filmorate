@@ -27,11 +27,13 @@ public class ReviewLikeDbStorage extends BaseRepository<ReviewLikes> {
 """;
 
     public void addLike(long reviewId, long userId) {
+        jdbc.update(DELETE_LIKE, reviewId, userId);
         jdbc.update(ADD_LIKE, reviewId, userId);
         updateUseful(reviewId);
     }
 
     public void addDislike(long reviewId, long userId) {
+        jdbc.update(DELETE_LIKE, reviewId, userId);
         jdbc.update(ADD_DISLIKE, reviewId, userId);
         updateUseful(reviewId);
     }

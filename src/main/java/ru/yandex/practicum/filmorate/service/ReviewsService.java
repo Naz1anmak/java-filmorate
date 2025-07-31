@@ -67,12 +67,18 @@ public class ReviewsService {
         if (!reviewsStorage.existsById(id)) {
             throw new NotFoundException("Отзыв с id " + id + " не найден");
         }
+        if (!userStorage.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
         reviewLikeDbStorage.addLike(id, userId);
     }
 
     public void addDislike(long id, long userId) {
         if (!reviewsStorage.existsById(id)) {
             throw new NotFoundException("Отзыв с id " + id + " не найден");
+        }
+        if (!userStorage.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
         reviewLikeDbStorage.addDislike(id, userId);
     }
@@ -81,12 +87,18 @@ public class ReviewsService {
         if (!reviewsStorage.existsById(id)) {
             throw new NotFoundException("Отзыв с id " + id + " не найден");
         }
+        if (!userStorage.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
         reviewLikeDbStorage.deleteLike(id, userId);
     }
 
     public void deleteDislike(long id, long userId) {
         if (!reviewsStorage.existsById(id)) {
             throw new NotFoundException("Отзыв с id " + id + " не найден");
+        }
+        if (!userStorage.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
         reviewLikeDbStorage.deleteLike(id, userId);
     }
