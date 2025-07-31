@@ -62,7 +62,7 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     @Override
     public boolean delete(Long userId) {
-        return delete(DELETE_USER_BY_ID_QUERY, userId);
+        return delete("DELETE FROM users WHERE user_id = ?", userId);
     }
 
     @Override
@@ -104,5 +104,10 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     public void confirmFriendship(Long userId, Long friendId) {
         jdbc.update("UPDATE friendship SET status = 'CONFIRMED' " +
                     "WHERE user_id = ? AND friend_id = ?", userId, friendId);
+    }
+
+    @Override
+    public boolean existsById(Long userId) {
+        return findById(userId).isPresent();
     }
 }

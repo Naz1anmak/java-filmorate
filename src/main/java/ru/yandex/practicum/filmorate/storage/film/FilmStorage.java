@@ -19,5 +19,7 @@ public interface FilmStorage {
 
     List<Film> findTopFilms(int count);
 
+    boolean existsById(Long filmId);
+
     List<Film> findRecommendedFilms(Long userId);
 }

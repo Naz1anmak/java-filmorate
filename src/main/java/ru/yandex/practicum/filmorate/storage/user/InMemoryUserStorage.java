@@ -66,4 +66,9 @@ public class InMemoryUserStorage implements UserStorage {
     public void confirmFriendship(Long userId, Long friendId) {
 
     }
+
+    @Override
+    public boolean existsById(Long userId) {
+        return false;
+    }
 }
