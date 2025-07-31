@@ -29,6 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Disabled
 @JdbcTest
 @AutoConfigureTestDatabase
+@Disabled
+@Deprecated
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({
         UserDbStorage.class,

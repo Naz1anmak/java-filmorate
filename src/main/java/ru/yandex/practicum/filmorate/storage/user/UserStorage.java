@@ -28,4 +28,6 @@ public interface UserStorage {
     boolean hasFriendRequest(Long userId, Long friendId);
 
     void confirmFriendship(Long userId, Long friendId);
+
+    boolean existsById(Long userId);
 }

@@ -200,4 +200,9 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             f.getMovieRating().addAll(likesByFilm.getOrDefault(f.getId(), Set.of()));
         });
     }
+
+    @Override
+    public boolean existsById(Long filmId) {
+        return findById(filmId).isPresent();
+    }
 }
