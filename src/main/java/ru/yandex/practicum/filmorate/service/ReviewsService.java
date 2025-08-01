@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.event.EventOperation;
+import ru.yandex.practicum.filmorate.model.event.EventType;
 import ru.yandex.practicum.filmorate.model.review.Reviews;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.reviews.ReviewLikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.reviews.ReviewsStorage;
@@ -22,16 +25,19 @@ public class ReviewsService {
     private final ReviewLikeDbStorage reviewLikeDbStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final EventStorage eventStorage;
 
     public Reviews create(Reviews reviews) {
         validateAndChange(reviews);
         reviewsStorage.create(reviews);
+        eventStorage.saveEvent(reviews.getUserId(), reviews.getId(), EventType.REVIEW, EventOperation.ADD);
         return reviews;
     }
 
     public Reviews update(Reviews reviews) {
         validateAndChange(reviews);
         reviewsStorage.update(reviews);
+        eventStorage.saveEvent(reviews.getUserId(), reviews.getId(), EventType.REVIEW, EventOperation.UPDATE);
         return reviews;
     }
 
@@ -39,6 +45,7 @@ public class ReviewsService {
         if (!reviewsStorage.existsById(id)) {
             throw new NotFoundException("Отзыв с id " + id + " не найден");
         }
+        eventStorage.saveEvent(findById(id).getUserId(), id, EventType.REVIEW, EventOperation.REMOVE);
         reviewsStorage.delete(id);
     }
 
