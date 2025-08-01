@@ -20,7 +20,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewsService {
-
     private final ReviewsStorage reviewsStorage;
     private final ReviewLikeDbStorage reviewLikeDbStorage;
     private final UserStorage userStorage;

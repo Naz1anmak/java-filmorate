@@ -11,7 +11,6 @@ import java.sql.SQLException;
 
 @Component
 public class EventRowMapper implements RowMapper<Event> {
-
     @Override
     public Event mapRow(ResultSet rs, int rowNum) throws SQLException {
         return Event.builder()
@@ -23,5 +22,4 @@ public class EventRowMapper implements RowMapper<Event> {
                 .operation(EventOperation.valueOf(rs.getString("event_operation")))
                 .build();
     }
-
 }

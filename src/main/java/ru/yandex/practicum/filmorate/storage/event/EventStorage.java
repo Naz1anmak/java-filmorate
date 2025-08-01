@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.event;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,6 +10,7 @@ import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.event.EventOperation;
 import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -18,10 +18,11 @@ import java.time.Instant;
 import java.util.List;
 
 @Repository
-@RequiredArgsConstructor
-public class EventStorage {
-    private final JdbcTemplate jdbc;
-    private final RowMapper<Event> eventRowMapper;
+public class EventStorage extends BaseRepository<Event> {
+
+    public EventStorage(JdbcTemplate jdbc, RowMapper<Event> mapper) {
+        super(jdbc, mapper);
+    }
 
     @Transactional
     public void saveEvent(Long userId, Long entityId, EventType eventType, EventOperation eventOperation) {
@@ -48,7 +49,6 @@ public class EventStorage {
                 WHERE user_id = ?
                 ORDER BY timestamp
                 """;
-        return jdbc.query(query, eventRowMapper, userId);
+        return findMany(query, userId);
     }
-
 }

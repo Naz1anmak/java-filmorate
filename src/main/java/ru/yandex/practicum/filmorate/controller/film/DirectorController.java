@@ -33,7 +33,6 @@ public class DirectorController {
         return directorService.update(director);
     }
 
-
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable long id) {
         directorService.delete(id);
