@@ -34,13 +34,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             "WHERE film_id = ?";
     public static final String INSERT_FILM_GENRES_QUERY = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
     public static final String DELETE_FILM_GENRES_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
-    private static final String TOP_N_SQL =
-            "SELECT f.* " +
-                    "FROM films f " +
-                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-                    "GROUP BY f.film_id " +
-                    "ORDER BY COUNT(ul.user_id) DESC " +
-                    "LIMIT ?";
     private static final String DELETE_FILM_BY_ID_QUERY = "DELETE FROM films WHERE film_id = ?";
     private static final String INSERT_FILM_DIRECTORS_QUERY =
             "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
@@ -163,13 +156,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public List<Film> findTopFilms(int count) {
-        List<Film> films = jdbc.query(TOP_N_SQL, filmRowMapper, count);
-        enrichFilms(films);
-        return films;
-    }
-
-    @Override
     @Transactional
     public List<Film> findRecommendedFilms(Long userId) {
         String query = """
@@ -249,6 +235,55 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         return films;
     }
 
+    @Override
+    public List<Film> findTopFilms(int count, Long genreId, Integer year) {
+        List<Object> params = new ArrayList<>();
+        String sql;
+
+        if (genreId != null && year != null) {
+            sql = "SELECT f.* " +
+                    "FROM films f " +
+                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+                    "JOIN film_genres fg ON f.film_id = fg.film_id " +
+                    "WHERE fg.genre_id = ? AND EXTRACT(YEAR FROM f.release_date) = ? " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(ul.user_id) DESC " +
+                    "LIMIT ?";
+            params.add(genreId);
+            params.add(year);
+        } else if (genreId != null) {
+            sql = "SELECT f.* " +
+                    "FROM films f " +
+                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+                    "JOIN film_genres fg ON f.film_id = fg.film_id " +
+                    "WHERE fg.genre_id = ? " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(ul.user_id) DESC " +
+                    "LIMIT ?";
+            params.add(genreId);
+        } else if (year != null) {
+            sql = "SELECT f.* " +
+                    "FROM films f " +
+                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(ul.user_id) DESC " +
+                    "LIMIT ?";
+            params.add(year);
+        } else {
+            sql = "SELECT f.* " +
+                    "FROM films f " +
+                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(ul.user_id) DESC " +
+                    "LIMIT ?";
+        }
+        params.add(count);
+        List<Film> films = jdbc.query(sql, filmRowMapper, params.toArray());
+        enrichFilms(films);
+        return films;
+    }
+
     private void enrichFilms(List<Film> films) {
         if (films.isEmpty()) return;
 
@@ -268,10 +303,5 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             f.getMovieRating().clear();
             f.getMovieRating().addAll(likesByFilm.getOrDefault(f.getId(), Set.of()));
         });
-    }
-
-    @Override
-    public boolean existsById(Long filmId) {
-        return findById(filmId).isPresent();
     }
 }

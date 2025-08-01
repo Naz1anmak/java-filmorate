@@ -17,9 +17,7 @@ public interface FilmStorage {
 
     Optional<Film> findById(Long filmId);
 
-    List<Film> findTopFilms(int count);
-
-    boolean existsById(Long filmId);
+    List<Film> findTopFilms(int count, Long genreId, Integer year);
 
     List<Film> findRecommendedFilms(Long userId);
 

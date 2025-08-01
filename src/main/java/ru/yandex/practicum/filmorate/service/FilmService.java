@@ -92,8 +92,17 @@ public class FilmService {
         eventStorage.saveEvent(userId, filmId, EventType.LIKE, EventOperation.REMOVE);
     }
 
-    public List<Film> getTopFilms(int count) {
-        return filmStorage.findTopFilms(count);
+    public List<Film> getTopFilms(int count, Long genreId, Integer year) {
+        if (count <= 0) {
+            throw new ValidationException("Параметр count должен быть больше 0");
+        }
+        if (genreId != null && !genreRepository.existsById(genreId)) {
+            throw new NotFoundException("Жанр с id=" + genreId + " не найден");
+        }
+        if (year != null && year < 0) {
+            throw new ValidationException("Год не может быть отрицательным");
+        }
+        return filmStorage.findTopFilms(count, genreId, year);
     }
 
     public List<Film> getRecommendations(Long userId) {
@@ -126,7 +135,6 @@ public class FilmService {
                 throw new ValidationException("Параметр 'by' может содержать только 'title' или 'director'");
             }
         }
-
         if (searchTitle && searchDirector) {
             return filmStorage.findByTitleAndDirector(query);
         } else if (searchTitle) {
@@ -157,7 +165,6 @@ public class FilmService {
         if (query == null || query.isBlank()) {
             throw new ValidationException("Текст поиска не может быть пустым");
         }
-
         if (by == null || by.isBlank()) {
             throw new ValidationException("Параметр 'by' не может быть пустым");
         }

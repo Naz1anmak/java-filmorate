@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.event.EventOperation;
 import ru.yandex.practicum.filmorate.model.event.EventType;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -23,5 +22,4 @@ public class EventRowMapper implements RowMapper<Event> {
                 .operation(EventOperation.valueOf(rs.getString("event_operation")))
                 .build();
     }
-
 }

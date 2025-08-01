@@ -42,10 +42,9 @@ public class ReviewsService {
     }
 
     public void delete(long id) {
-        if (!reviewsStorage.existsById(id)) {
-            throw new NotFoundException("Отзыв с id " + id + " не найден");
-        }
-        eventStorage.saveEvent(findById(id).getUserId(), id, EventType.REVIEW, EventOperation.REMOVE);
+        Reviews review = reviewsStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв с id " + id + " не найден"));
+        eventStorage.saveEvent(review.getUserId(), id, EventType.REVIEW, EventOperation.REMOVE);
         reviewsStorage.delete(id);
     }
 
@@ -62,42 +61,34 @@ public class ReviewsService {
     }
 
     public void addLike(long id, long userId) {
-        if (!reviewsStorage.existsById(id)) {
-            throw new NotFoundException("Отзыв с id " + id + " не найден");
-        }
-        if (!userStorage.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        reviewsStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв с id " + id + " не найден"));
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
         reviewLikeDbStorage.addLike(id, userId);
     }
 
     public void addDislike(long id, long userId) {
-        if (!reviewsStorage.existsById(id)) {
-            throw new NotFoundException("Отзыв с id " + id + " не найден");
-        }
-        if (!userStorage.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        reviewsStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв с id " + id + " не найден"));
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
         reviewLikeDbStorage.addDislike(id, userId);
     }
 
     public void deleteLike(long id, long userId) {
-        if (!reviewsStorage.existsById(id)) {
-            throw new NotFoundException("Отзыв с id " + id + " не найден");
-        }
-        if (!userStorage.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        reviewsStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв с id " + id + " не найден"));
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
         reviewLikeDbStorage.deleteLike(id, userId);
     }
 
     public void deleteDislike(long id, long userId) {
-        if (!reviewsStorage.existsById(id)) {
-            throw new NotFoundException("Отзыв с id " + id + " не найден");
-        }
-        if (!userStorage.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        reviewsStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв с id " + id + " не найден"));
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
         reviewLikeDbStorage.deleteLike(id, userId);
     }
 
@@ -111,12 +102,10 @@ public class ReviewsService {
         if (reviews.getContent() == null || reviews.getContent().trim().isEmpty()) {
             throw new ValidationException("Отзыв не может быть пустым");
         }
+        userStorage.findById(reviews.getUserId())
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + reviews.getUserId() + " не найден"));
 
-        if (!userStorage.existsById(reviews.getUserId())) {
-            throw new NotFoundException("Пользователь с id " + reviews.getUserId() + " не найден");
-        }
-        if (!filmStorage.existsById(reviews.getFilmId())) {
-            throw new NotFoundException("Фильм с id " + reviews.getFilmId() + " не найден");
-        }
+        filmStorage.findById(reviews.getFilmId())
+                .orElseThrow(() -> new NotFoundException("Фильм с id " + reviews.getFilmId() + " не найден"));
     }
 }
