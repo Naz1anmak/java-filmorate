@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.controller.film;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.film.Director;
-import ru.yandex.practicum.filmorate.service.DirectorService;
+import ru.yandex.practicum.filmorate.service.film.DirectorService;
 
 import java.util.Collection;
 

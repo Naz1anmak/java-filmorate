@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +12,9 @@ import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.model.film.MpaRating;
 import ru.yandex.practicum.filmorate.model.user.User;
-import ru.yandex.practicum.filmorate.storage.event.EventStorage;
-import ru.yandex.practicum.filmorate.storage.film.*;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.service.event.EventService;
+import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,12 +27,11 @@ import java.util.Set;
 public class FilmService {
     private final UserService userService;
     private final FilmStorage filmStorage;
-    private final MpaRepository mpaRepository;
-    private final GenreRepository genreRepository;
-    private final LikeRepository likeRepository;
-    private final UserStorage userStorage;
-    private final DirectorRepository directorRepository;
-    private final EventStorage eventStorage;
+    private final MpaService mpaService;
+    private final GenreService genreService;
+    private final LikeService likeService;
+    private final DirectorService directorService;
+    private final EventService eventService;
 
     public Film create(Film film) {
         validateAndChange(film);
@@ -68,28 +67,26 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
-        Film film = filmStorage.findById(filmId)
-                .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден"));
+        Film film = findById(filmId);
         User user = userService.findById(userId);
 
-        Set<Long> likes = likeRepository.findLikesByFilm(filmId);
+        Set<Long> likes = likeService.findLikesByFilm(filmId);
         if (likes.contains(userId)) {
             throw new IllegalArgumentException("Пользователь уже ставил лайк этому фильму");
         }
 
-        likeRepository.addLike(filmId, userId);
+        likeService.addLike(filmId, userId);
         log.info("Пользователь {} поставил лайк фильму \"{}\"", user.getName(), film.getName());
-        eventStorage.saveEvent(userId, filmId, EventType.LIKE, EventOperation.ADD);
+        eventService.saveEvent(userId, filmId, EventType.LIKE, EventOperation.ADD);
     }
 
     public void deleteLike(Long filmId, Long userId) {
-        Film film = filmStorage.findById(filmId)
-                .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден"));
+        Film film = findById(filmId);
         User user = userService.findById(userId);
 
-        likeRepository.deleteLike(filmId, userId);
+        likeService.deleteLike(filmId, userId);
         log.info("Пользователь {} удалил лайк фильму \"{}\"", user.getName(), film.getName());
-        eventStorage.saveEvent(userId, filmId, EventType.LIKE, EventOperation.REMOVE);
+        eventService.saveEvent(userId, filmId, EventType.LIKE, EventOperation.REMOVE);
     }
 
     public List<Film> getTopFilms(int count) {
@@ -97,15 +94,12 @@ public class FilmService {
     }
 
     public List<Film> getRecommendations(Long userId) {
-        userStorage.findById(userId).orElseThrow(() ->
-                new NotFoundException("Пользователь с идентификатором " + userId + " не найден")
-        );
+        userService.findById(userId);
         return filmStorage.findRecommendedFilms(userId);
     }
 
     public List<Film> getFilmsByDirector(Long directorId, String sortBy) {
-        directorRepository.findById(directorId)
-                .orElseThrow(() -> new NotFoundException("Режиссер с id=" + directorId + " не найден"));
+        directorService.getDirectorById(directorId);
         return filmStorage.findByDirectorSorted(directorId, sortBy);
     }
 
@@ -137,19 +131,21 @@ public class FilmService {
         throw new ValidationException("Параметр 'by' должен содержать 'title' или 'director'");
     }
 
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return null;
+        //TODO
+    }
+
     private void validateAndChange(Film film) {
-        MpaRating mpa = mpaRepository.findById(film.getMpaRating().getId())
-                .orElseThrow(() -> new NotFoundException("MPA с id=" + film.getMpaRating().getId() + " не найден"));
+        MpaRating mpa = mpaService.getMpaById(film.getMpaRating().getId());
         film.setMpaRating(mpa);
 
         Set<Genre> genres = Optional.ofNullable(film.getGenres()).orElse(Set.of());
-        genres.forEach(g -> genreRepository.findById(g.getId())
-                .orElseThrow(() -> new NotFoundException("Жанр с id=" + g.getId() + " не найден")));
+        genres.forEach(g -> genreService.getGenreById(g.getId()));
         film.setGenres(genres);
 
         Set<Director> directors = Optional.ofNullable(film.getDirectors()).orElse(Set.of());
-        directors.forEach(d -> directorRepository.findById(d.getId())
-                .orElseThrow(() -> new NotFoundException("Режиссер с id=" + d.getId() + " не найден")));
+        directors.forEach(d -> directorService.getDirectorById(d.getId()));
         film.setDirectors(directors);
     }
 

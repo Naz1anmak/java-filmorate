@@ -24,8 +24,8 @@ public class GenreRepository extends BaseRepository<Genre> {
         super(jdbc, mapper);
     }
 
-    public Optional<Genre> findById(long id) {
-        return findOne(FIND_BY_ID, id);
+    public Optional<Genre> findById(long genreId) {
+        return findOne(FIND_BY_ID, genreId);
     }
 
     public List<Genre> findAll() {

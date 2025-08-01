@@ -1,16 +1,16 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.event.EventOperation;
 import ru.yandex.practicum.filmorate.model.event.EventType;
 import ru.yandex.practicum.filmorate.model.user.User;
-import ru.yandex.practicum.filmorate.storage.event.EventStorage;
+import ru.yandex.practicum.filmorate.service.event.EventService;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.model.event.Event;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
-    private final EventStorage eventStorage;
+    private final EventService eventService;
 
     public User create(User user) {
         userStorage.create(user);
@@ -64,7 +64,7 @@ public class UserService {
         User friend = findById(friendId);
 
         userStorage.addFriend(userId, friendId);
-        eventStorage.saveEvent(userId, friendId, EventType.FRIEND, EventOperation.ADD);
+        eventService.saveEvent(userId, friendId, EventType.FRIEND, EventOperation.ADD);
         log.info("{} отправил заявку {} на добавление в друзья!", user.getName(), friend.getName());
 
         if (userStorage.hasFriendRequest(friendId, userId)) {
@@ -82,7 +82,7 @@ public class UserService {
         User friend = findById(friendId);
 
         userStorage.deleteFriend(userId, friendId);
-        eventStorage.saveEvent(userId, friendId, EventType.FRIEND, EventOperation.REMOVE);
+        eventService.saveEvent(userId, friendId, EventType.FRIEND, EventOperation.REMOVE);
         log.info("{} и {} больше не друзья!", user.getName(), friend.getName());
     }
 
@@ -102,7 +102,6 @@ public class UserService {
     public List<Event> getFeed(Long userId) {
         userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
-        return eventStorage.getFeed(userId);
+        return eventService.getFeed(userId);
     }
-
 }

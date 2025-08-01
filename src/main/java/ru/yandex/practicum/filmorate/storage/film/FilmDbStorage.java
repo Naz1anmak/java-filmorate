@@ -11,6 +11,10 @@ import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.model.film.MpaRating;
+import ru.yandex.practicum.filmorate.service.film.DirectorService;
+import ru.yandex.practicum.filmorate.service.film.GenreService;
+import ru.yandex.practicum.filmorate.service.film.LikeService;
+import ru.yandex.practicum.filmorate.service.film.MpaService;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
@@ -20,10 +24,10 @@ import java.util.*;
 @Repository
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private final FilmRowMapper filmRowMapper;
-    private final GenreRepository genreRepository;
-    private final MpaRepository mpaRepository;
-    private final DirectorRepository directorRepository;
-    private final LikeRepository likeRepository;
+    private final GenreService genreService;
+    private final MpaService mpaService;
+    private final DirectorService directorService;
+    private final LikeService likeService;
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
     private static final String INSERT_QUERY = "INSERT INTO films (name, description, " +
@@ -71,13 +75,13 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             "ORDER BY likes_count DESC";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmRowMapper filmRowMapper,
-                         GenreRepository genreRepository, MpaRepository mpaRepository, DirectorRepository directorRepository, LikeRepository likeRepository) {
+                         GenreService genreService, MpaService mpaService, DirectorService directorService, LikeService likeService) {
         super(jdbc, mapper);
         this.filmRowMapper = filmRowMapper;
-        this.genreRepository = genreRepository;
-        this.mpaRepository = mpaRepository;
-        this.directorRepository = directorRepository;
-        this.likeRepository = likeRepository;
+        this.genreService = genreService;
+        this.mpaService = mpaService;
+        this.directorService = directorService;
+        this.likeService = likeService;
     }
 
     @Override
@@ -256,10 +260,10 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 .map(Film::getId)
                 .toList();
 
-        Map<Long, Set<Genre>> genresByFilm = genreRepository.findByFilmIds(filmIds);
-        Map<Long, MpaRating> mpaByFilm = mpaRepository.findByFilmIds(filmIds);
-        Map<Long, Set<Director>> directorsByFilm = directorRepository.findByFilmIds(filmIds);
-        Map<Long, Set<Long>> likesByFilm = likeRepository.findByFilmIds(filmIds);
+        Map<Long, Set<Genre>> genresByFilm = genreService.findByFilmIds(filmIds);
+        Map<Long, MpaRating> mpaByFilm = mpaService.findByFilmIds(filmIds);
+        Map<Long, Set<Director>> directorsByFilm = directorService.findByFilmIds(filmIds);
+        Map<Long, Set<Long>> likesByFilm = likeService.findByFilmIds(filmIds);
 
         films.forEach(f -> {
             f.setGenres(genresByFilm.getOrDefault(f.getId(), Set.of()));

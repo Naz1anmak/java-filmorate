@@ -19,6 +19,9 @@ import java.util.List;
 
 @Repository
 public class EventStorage extends BaseRepository<Event> {
+    private static final String SAVE_EVENT = "INSERT INTO events (user_id, entity_id, " +
+            "timestamp, event_type, event_operation) VALUES (?, ?, ?, ?, ?)";
+    private static final String GET_FEED = " SELECT * FROM events WHERE user_id = ? ORDER BY timestamp";
 
     public EventStorage(JdbcTemplate jdbc, RowMapper<Event> mapper) {
         super(jdbc, mapper);
@@ -27,9 +30,8 @@ public class EventStorage extends BaseRepository<Event> {
     @Transactional
     public void saveEvent(Long userId, Long entityId, EventType eventType, EventOperation eventOperation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String query = "INSERT INTO events (user_id, entity_id, timestamp, event_type, event_operation) VALUES (?, ?, ?, ?, ?)";
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(SAVE_EVENT, Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, userId);
             ps.setLong(2, entityId);
             ps.setLong(3, Instant.now().toEpochMilli());
@@ -43,12 +45,6 @@ public class EventStorage extends BaseRepository<Event> {
 
     @Transactional
     public List<Event> getFeed(Long userId) {
-        String query = """
-                SELECT *
-                FROM events
-                WHERE user_id = ?
-                ORDER BY timestamp
-                """;
-        return findMany(query, userId);
+        return findMany(GET_FEED, userId);
     }
 }

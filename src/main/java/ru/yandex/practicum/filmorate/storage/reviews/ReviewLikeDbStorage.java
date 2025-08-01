@@ -8,15 +8,9 @@ import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
 @Repository
 public class ReviewLikeDbStorage extends BaseRepository<ReviewLikes> {
-
-    public ReviewLikeDbStorage(JdbcTemplate jdbc, RowMapper<ReviewLikes> mapper) {
-        super(jdbc, mapper);
-    }
-
     private static final String ADD_LIKE = "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, TRUE)";
     private static final String ADD_DISLIKE = "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, FALSE)";
     private static final String DELETE_LIKE = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ?";
-
     private static final String UPDATE_LIKE = """
                 UPDATE reviews SET useful = (
                     SELECT COALESCE(SUM(CASE WHEN is_like THEN 1 ELSE -1 END), 0)
@@ -25,6 +19,10 @@ public class ReviewLikeDbStorage extends BaseRepository<ReviewLikes> {
                 )
                 WHERE review_id = ?
             """;
+
+    public ReviewLikeDbStorage(JdbcTemplate jdbc, RowMapper<ReviewLikes> mapper) {
+        super(jdbc, mapper);
+    }
 
     public void addLike(long reviewId, long userId) {
         jdbc.update(DELETE_LIKE, reviewId, userId);
