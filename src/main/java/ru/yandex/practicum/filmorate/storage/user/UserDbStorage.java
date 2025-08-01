@@ -103,9 +103,4 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
         jdbc.update("UPDATE friendship SET status = 'CONFIRMED' " +
                 "WHERE user_id = ? AND friend_id = ?", userId, friendId);
     }
-
-    @Override
-    public boolean existsById(Long userId) {
-        return findById(userId).isPresent();
-    }
 }

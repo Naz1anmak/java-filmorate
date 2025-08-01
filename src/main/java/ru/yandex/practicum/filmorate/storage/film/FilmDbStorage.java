@@ -236,39 +236,50 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public boolean existsById(Long filmId) {
-        return findById(filmId).isPresent();
-    }
-
-
-    @Override
     public List<Film> findTopFilms(int count, Long genreId, Integer year) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT f.* " +
-                        "FROM films f " +
-                        "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-                        "LEFT JOIN film_genres fg ON f.film_id = fg.film_id " +
-                        "WHERE 1=1 ");
-
         List<Object> params = new ArrayList<>();
+        String sql;
 
-        if (genreId != null) {
-            sql.append("AND fg.genre_id = ? ");
+        if (genreId != null && year != null) {
+            sql = "SELECT f.* " +
+                    "FROM films f " +
+                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+                    "JOIN film_genres fg ON f.film_id = fg.film_id " +
+                    "WHERE fg.genre_id = ? AND EXTRACT(YEAR FROM f.release_date) = ? " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(ul.user_id) DESC " +
+                    "LIMIT ?";
             params.add(genreId);
-        }
-
-        if (year != null) {
-            sql.append("AND EXTRACT(YEAR FROM f.release_date) = ? ");
             params.add(year);
+        } else if (genreId != null) {
+            sql = "SELECT f.* " +
+                    "FROM films f " +
+                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+                    "JOIN film_genres fg ON f.film_id = fg.film_id " +
+                    "WHERE fg.genre_id = ? " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(ul.user_id) DESC " +
+                    "LIMIT ?";
+            params.add(genreId);
+        } else if (year != null) {
+            sql = "SELECT f.* " +
+                    "FROM films f " +
+                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(ul.user_id) DESC " +
+                    "LIMIT ?";
+            params.add(year);
+        } else {
+            sql = "SELECT f.* " +
+                    "FROM films f " +
+                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(ul.user_id) DESC " +
+                    "LIMIT ?";
         }
-
-        sql.append("GROUP BY f.film_id ")
-                .append("ORDER BY COUNT(ul.user_id) DESC ")
-                .append("LIMIT ?");
-
         params.add(count);
-
-        List<Film> films = jdbc.query(sql.toString(), filmRowMapper, params.toArray());
+        List<Film> films = jdbc.query(sql, filmRowMapper, params.toArray());
         enrichFilms(films);
         return films;
     }

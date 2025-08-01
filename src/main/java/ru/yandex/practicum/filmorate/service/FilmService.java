@@ -99,7 +99,6 @@ public class FilmService {
         if (genreId != null && !genreRepository.existsById(genreId)) {
             throw new NotFoundException("Жанр с id=" + genreId + " не найден");
         }
-
         if (year != null && year < 0) {
             throw new ValidationException("Год не может быть отрицательным");
         }
@@ -136,7 +135,6 @@ public class FilmService {
                 throw new ValidationException("Параметр 'by' может содержать только 'title' или 'director'");
             }
         }
-
         if (searchTitle && searchDirector) {
             return filmStorage.findByTitleAndDirector(query);
         } else if (searchTitle) {
@@ -167,7 +165,6 @@ public class FilmService {
         if (query == null || query.isBlank()) {
             throw new ValidationException("Текст поиска не может быть пустым");
         }
-
         if (by == null || by.isBlank()) {
             throw new ValidationException("Параметр 'by' не может быть пустым");
         }
