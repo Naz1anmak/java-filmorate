@@ -34,18 +34,34 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             "WHERE film_id = ?";
     public static final String INSERT_FILM_GENRES_QUERY = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
     public static final String DELETE_FILM_GENRES_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
-    /*private static final String TOP_N_SQL =
-            "SELECT f.* " +
-                    "FROM films f " +
-                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-                    "GROUP BY f.film_id " +
-                    "ORDER BY COUNT(ul.user_id) DESC " +
-                    "LIMIT ?";*/
     private static final String DELETE_FILM_BY_ID_QUERY = "DELETE FROM films WHERE film_id = ?";
     private static final String INSERT_FILM_DIRECTORS_QUERY =
             "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
     private static final String DELETE_FILM_DIRECTORS_QUERY =
             "DELETE FROM film_directors WHERE film_id = ?";
+    private static final String FIND_BY_TITLE_QUERY = "SELECT f.*, COUNT(ul.user_id) AS likes_count " +
+            "FROM films f " +
+            "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+            "WHERE LOWER(f.name) LIKE LOWER('%' || ? || '%') " +
+            "GROUP BY f.film_id " +
+            "ORDER BY likes_count DESC";
+    private static final String FIND_BY_DIRECTORS_QUERY = "SELECT f.*, COUNT(ul.user_id) AS likes_count " +
+            "FROM films f " +
+            "JOIN film_directors fd ON f.film_id = fd.film_id " +
+            "JOIN directors d ON fd.director_id = d.director_id " +
+            "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+            "WHERE LOWER(d.name) LIKE LOWER('%' || ? || '%') " +
+            "GROUP BY f.film_id " +
+            "ORDER BY likes_count DESC";
+    private static final String FIND_BY_TITLE_OR_DIRECTORS_QUERY = "SELECT f.*, COUNT(ul.user_id) AS likes_count " +
+            "FROM films f " +
+            "LEFT JOIN film_directors fd ON f.film_id = fd.film_id " +
+            "LEFT JOIN directors d ON fd.director_id = d.director_id " +
+            "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
+            "WHERE LOWER(f.name) LIKE LOWER('%' || ? || '%') " +
+            "OR LOWER(d.name) LIKE LOWER('%' || ? || '%') " +
+            "GROUP BY f.film_id " +
+            "ORDER BY likes_count DESC";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmRowMapper filmRowMapper,
                          GenreRepository genreRepository, MpaRepository mpaRepository, DirectorRepository directorRepository, LikeRepository likeRepository) {
@@ -139,13 +155,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         return film;
     }
 
-    /*@Override
-    public List<Film> findTopFilms(int count, Long genreId, Integer year) {
-        List<Film> films = jdbc.query(TOP_N_SQL, filmRowMapper, count);
-        enrichFilms(films);
-        return films;
-    }*/
-
     @Override
     @Transactional
     public List<Film> findRecommendedFilms(Long userId) {
@@ -201,6 +210,27 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 ORDER BY\s""" + orderClause;
 
         List<Film> films = jdbc.query(sql, filmRowMapper, directorId);
+        enrichFilms(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> findByTitle(String query) {
+        List<Film> films = jdbc.query(FIND_BY_TITLE_QUERY, filmRowMapper, query);
+        enrichFilms(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> findByDirector(String query) {
+        List<Film> films = jdbc.query(FIND_BY_DIRECTORS_QUERY, filmRowMapper, query);
+        enrichFilms(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> findByTitleAndDirector(String query) {
+        List<Film> films = jdbc.query(FIND_BY_TITLE_OR_DIRECTORS_QUERY, filmRowMapper, query, query);
         enrichFilms(films);
         return films;
     }

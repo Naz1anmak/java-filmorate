@@ -5,11 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.event.EventOperation;
+import ru.yandex.practicum.filmorate.model.event.EventType;
 import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.model.film.MpaRating;
 import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -29,6 +32,7 @@ public class FilmService {
     private final LikeRepository likeRepository;
     private final UserStorage userStorage;
     private final DirectorRepository directorRepository;
+    private final EventStorage eventStorage;
 
     public Film create(Film film) {
         validateAndChange(film);
@@ -75,6 +79,7 @@ public class FilmService {
 
         likeRepository.addLike(filmId, userId);
         log.info("Пользователь {} поставил лайк фильму \"{}\"", user.getName(), film.getName());
+        eventStorage.saveEvent(userId, filmId, EventType.LIKE, EventOperation.ADD);
     }
 
     public void deleteLike(Long filmId, Long userId) {
@@ -84,6 +89,7 @@ public class FilmService {
 
         likeRepository.deleteLike(filmId, userId);
         log.info("Пользователь {} удалил лайк фильму \"{}\"", user.getName(), film.getName());
+        eventStorage.saveEvent(userId, filmId, EventType.LIKE, EventOperation.REMOVE);
     }
 
     public List<Film> getTopFilms(int count, Long genreId, Integer year) {
@@ -113,6 +119,34 @@ public class FilmService {
         return filmStorage.findByDirectorSorted(directorId, sortBy);
     }
 
+    public List<Film> findByTitleOrDirector(String query, String by) {
+        validateSearchParams(query, by);
+
+        String[] searchTypes = by.split(",");
+        boolean searchTitle = false;
+        boolean searchDirector = false;
+
+        for (String type : searchTypes) {
+            String trimmedType = type.trim().toLowerCase();
+            if (trimmedType.equals("title")) {
+                searchTitle = true;
+            } else if (trimmedType.equals("director")) {
+                searchDirector = true;
+            } else {
+                throw new ValidationException("Параметр 'by' может содержать только 'title' или 'director'");
+            }
+        }
+
+        if (searchTitle && searchDirector) {
+            return filmStorage.findByTitleAndDirector(query);
+        } else if (searchTitle) {
+            return filmStorage.findByTitle(query);
+        } else if (searchDirector) {
+            return filmStorage.findByDirector(query);
+        }
+        throw new ValidationException("Параметр 'by' должен содержать 'title' или 'director'");
+    }
+
     private void validateAndChange(Film film) {
         MpaRating mpa = mpaRepository.findById(film.getMpaRating().getId())
                 .orElseThrow(() -> new NotFoundException("MPA с id=" + film.getMpaRating().getId() + " не найден"));
@@ -127,5 +161,15 @@ public class FilmService {
         directors.forEach(d -> directorRepository.findById(d.getId())
                 .orElseThrow(() -> new NotFoundException("Режиссер с id=" + d.getId() + " не найден")));
         film.setDirectors(directors);
+    }
+
+    private void validateSearchParams(String query, String by) {
+        if (query == null || query.isBlank()) {
+            throw new ValidationException("Текст поиска не может быть пустым");
+        }
+
+        if (by == null || by.isBlank()) {
+            throw new ValidationException("Параметр 'by' не может быть пустым");
+        }
     }
 }
