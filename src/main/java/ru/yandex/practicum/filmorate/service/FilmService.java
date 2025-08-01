@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
@@ -85,8 +86,18 @@ public class FilmService {
         log.info("Пользователь {} удалил лайк фильму \"{}\"", user.getName(), film.getName());
     }
 
-    public List<Film> getTopFilms(int count) {
-        return filmStorage.findTopFilms(count);
+    public List<Film> getTopFilms(int count, Long genreId, Integer year) {
+        if (count <= 0) {
+            throw new ValidationException("Параметр count должен быть больше 0");
+        }
+        if (genreId != null && !genreRepository.existsById(genreId)) {
+            throw new NotFoundException("Жанр с id=" + genreId + " не найден");
+        }
+
+        if (year != null && year < 0) {
+            throw new ValidationException("Год не может быть отрицательным");
+        }
+        return filmStorage.findTopFilms(count, genreId, year);
     }
 
     public List<Film> getRecommendations(Long userId) {

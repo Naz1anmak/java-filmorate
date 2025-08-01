@@ -28,6 +28,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
+@Deprecated
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -185,7 +186,7 @@ class FilmoRateApplicationTests {
     void testTopFilmsAndLikes() {
         likeStorage.addLike(filmId1, userId1);
 
-        var top1 = filmStorage.findTopFilms(1);
+        var top1 = filmStorage.findTopFilms(1, null, null);
         assertThat(top1)
                 .hasSize(1)
                 .extracting(Film::getId)
