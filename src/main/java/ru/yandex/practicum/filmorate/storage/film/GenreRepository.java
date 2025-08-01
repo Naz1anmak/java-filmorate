@@ -59,12 +59,6 @@ public class GenreRepository extends BaseRepository<Genre> {
                 ));
     }
 
-    public boolean existsById(long id) {
-        String sql = "SELECT COUNT(*) FROM genres WHERE genre_id = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, id);
-        return count != null && count > 0;
-    }
-
     private static class GenreRow {
         private final Long filmId;
         private final Genre genre;

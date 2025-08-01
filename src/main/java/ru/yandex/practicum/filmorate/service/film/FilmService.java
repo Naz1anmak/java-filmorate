@@ -25,8 +25,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class FilmService {
-    private final UserService userService;
     private final FilmStorage filmStorage;
+    private final UserService userService;
     private final MpaService mpaService;
     private final GenreService genreService;
     private final LikeService likeService;
@@ -93,9 +93,7 @@ public class FilmService {
         if (count <= 0) {
             throw new ValidationException("Параметр count должен быть больше 0");
         }
-        if (genreId != null && !genreRepository.existsById(genreId)) {
-            throw new NotFoundException("Жанр с id=" + genreId + " не найден");
-        }
+        if (genreId != null) genreService.getGenreById(genreId);
         if (year != null && year < 0) {
             throw new ValidationException("Год не может быть отрицательным");
         }
@@ -140,8 +138,11 @@ public class FilmService {
     }
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        return null;
-        //TODO
+        filmStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
+        filmStorage.findById(friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + friendId + " не найден"));
+        return filmStorage.getCommonFilms(userId, friendId);
     }
 
     private void validateAndChange(Film film) {

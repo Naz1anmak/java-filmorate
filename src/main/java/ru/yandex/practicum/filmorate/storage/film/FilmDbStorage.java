@@ -28,44 +28,53 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private final MpaService mpaService;
     private final DirectorService directorService;
     private final LikeService likeService;
-    private static final String FIND_ALL_QUERY = "SELECT * FROM films";
-    private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
+    private static final String FIND_ALL = "SELECT * FROM films";
+    private static final String FIND_BY_ID = "SELECT * FROM films WHERE film_id = ?";
     private static final String INSERT_QUERY = "INSERT INTO films (name, description, " +
             "release_date, duration, mpa_rating_id) " +
             "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE films SET name = ?, description = ?, " +
             "release_date = ?, duration = ?, mpa_rating_id = ? " +
             "WHERE film_id = ?";
-    public static final String INSERT_FILM_GENRES_QUERY = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
-    public static final String DELETE_FILM_GENRES_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
-    private static final String DELETE_FILM_BY_ID_QUERY = "DELETE FROM films WHERE film_id = ?";
-    private static final String INSERT_FILM_DIRECTORS_QUERY =
-            "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
-    private static final String DELETE_FILM_DIRECTORS_QUERY =
-            "DELETE FROM film_directors WHERE film_id = ?";
-    private static final String FIND_BY_TITLE_QUERY = "SELECT f.*, COUNT(ul.user_id) AS likes_count " +
-            "FROM films f " +
-            "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-            "WHERE LOWER(f.name) LIKE LOWER('%' || ? || '%') " +
-            "GROUP BY f.film_id " +
-            "ORDER BY likes_count DESC";
-    private static final String FIND_BY_DIRECTORS_QUERY = "SELECT f.*, COUNT(ul.user_id) AS likes_count " +
-            "FROM films f " +
-            "JOIN film_directors fd ON f.film_id = fd.film_id " +
-            "JOIN directors d ON fd.director_id = d.director_id " +
-            "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-            "WHERE LOWER(d.name) LIKE LOWER('%' || ? || '%') " +
-            "GROUP BY f.film_id " +
-            "ORDER BY likes_count DESC";
-    private static final String FIND_BY_TITLE_OR_DIRECTORS_QUERY = "SELECT f.*, COUNT(ul.user_id) AS likes_count " +
-            "FROM films f " +
-            "LEFT JOIN film_directors fd ON f.film_id = fd.film_id " +
-            "LEFT JOIN directors d ON fd.director_id = d.director_id " +
-            "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-            "WHERE LOWER(f.name) LIKE LOWER('%' || ? || '%') " +
-            "OR LOWER(d.name) LIKE LOWER('%' || ? || '%') " +
-            "GROUP BY f.film_id " +
-            "ORDER BY likes_count DESC";
+    public static final String INSERT_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
+    public static final String DELETE_FILM_GENRES = "DELETE FROM film_genres WHERE film_id = ?";
+    private static final String DELETE_FILM_BY_ID = "DELETE FROM films WHERE film_id = ?";
+    private static final String INSERT_FILM_DIRECTORS = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
+    private static final String DELETE_FILM_DIRECTORS = "DELETE FROM film_directors WHERE film_id = ?";
+    private static final String FIND_BY_TITLE = """
+            SELECT f.*, COUNT(ul.user_id) AS likes_count
+            FROM films f
+            LEFT JOIN user_likes ul ON f.film_id = ul.film_id
+            WHERE LOWER(f.name) LIKE LOWER('%' || ? || '%')
+            GROUP BY f.film_id
+            ORDER BY likes_count DESC""";
+    private static final String FIND_BY_DIRECTORS = """
+            SELECT f.*, COUNT(ul.user_id) AS likes_count
+            FROM films f
+            JOIN film_directors fd ON f.film_id = fd.film_id
+            JOIN directors d ON fd.director_id = d.director_id
+            LEFT JOIN user_likes ul ON f.film_id = ul.film_id
+            WHERE LOWER(d.name) LIKE LOWER('%' || ? || '%')
+            GROUP BY f.film_id
+            ORDER BY likes_count DESC""";
+    private static final String FIND_BY_TITLE_OR_DIRECTOR = """
+            SELECT f.*, COUNT(ul.user_id) AS likes_count
+            FROM films f
+            LEFT JOIN film_directors fd ON f.film_id = fd.film_id
+            LEFT JOIN directors d ON fd.director_id = d.director_id
+            LEFT JOIN user_likes ul ON f.film_id = ul.film_id
+            WHERE LOWER(f.name) LIKE LOWER('%' || ? || '%')
+            OR LOWER(d.name) LIKE LOWER('%' || ? || '%')
+            GROUP BY f.film_id
+            ORDER BY likes_count DESC""";
+    private static final String FIND_COMMON_FILMS = """
+            SELECT f.*
+            FROM films f
+            JOIN user_likes ul1 ON f.film_id = ul1.film_id
+            JOIN user_likes ul2 ON f.film_id = ul2.film_id
+            WHERE ul1.user_id = ? AND ul2.user_id = ?
+            GROUP BY f.film_id
+            ORDER BY COUNT(ul1.user_id) DESC""";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmRowMapper filmRowMapper,
                          GenreService genreService, MpaService mpaService, DirectorService directorService, LikeService likeService) {
@@ -88,20 +97,20 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         );
         film.setId(id);
 
-        jdbc.update(DELETE_FILM_GENRES_QUERY, id);
+        jdbc.update(DELETE_FILM_GENRES, id);
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 try {
-                    jdbc.update(INSERT_FILM_GENRES_QUERY, id, genre.getId());
+                    jdbc.update(INSERT_FILM_GENRES, id, genre.getId());
                 } catch (DuplicateKeyException ignored) {
                     log.warn("Попытка добавить дублирующийся жанр {} для фильма {}", genre.getName(), film.getName());
                 }
             }
         }
-        jdbc.update(DELETE_FILM_DIRECTORS_QUERY, id);
+        jdbc.update(DELETE_FILM_DIRECTORS, id);
         if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
             for (Director director : film.getDirectors()) {
-                jdbc.update(INSERT_FILM_DIRECTORS_QUERY, id, director.getId());
+                jdbc.update(INSERT_FILM_DIRECTORS, id, director.getId());
             }
         }
         return film;
@@ -121,20 +130,20 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             throw new NotFoundException("Фильм не найден");
         }
 
-        jdbc.update(DELETE_FILM_GENRES_QUERY, film.getId());
+        jdbc.update(DELETE_FILM_GENRES, film.getId());
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 try {
-                    jdbc.update(INSERT_FILM_GENRES_QUERY, film.getId(), genre.getId());
+                    jdbc.update(INSERT_FILM_GENRES, film.getId(), genre.getId());
                 } catch (DuplicateKeyException ignored) {
                     log.warn("Попытка добавить дублирующийся жанр {} для фильма {}", genre.getName(), film.getName());
                 }
             }
         }
-        jdbc.update(DELETE_FILM_DIRECTORS_QUERY, film.getId());
+        jdbc.update(DELETE_FILM_DIRECTORS, film.getId());
         if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
             for (Director director : film.getDirectors()) {
-                jdbc.update(INSERT_FILM_DIRECTORS_QUERY, film.getId(), director.getId());
+                jdbc.update(INSERT_FILM_DIRECTORS, film.getId(), director.getId());
             }
         }
         return film;
@@ -142,19 +151,19 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public boolean delete(Long filmId) {
-        return delete(DELETE_FILM_BY_ID_QUERY, filmId);
+        return delete(DELETE_FILM_BY_ID, filmId);
     }
 
     @Override
     public Collection<Film> getFilms() {
-        List<Film> films = jdbc.query(FIND_ALL_QUERY, filmRowMapper);
+        List<Film> films = jdbc.query(FIND_ALL, filmRowMapper);
         enrichFilms(films);
         return films;
     }
 
     @Override
     public Optional<Film> findById(Long filmId) {
-        Optional<Film> film = findOne(FIND_BY_ID_QUERY, filmId);
+        Optional<Film> film = findOne(FIND_BY_ID, filmId);
         film.ifPresent(f -> enrichFilms(List.of(f)));
         return film;
     }
@@ -164,26 +173,26 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     public List<Film> findRecommendedFilms(Long userId) {
         String query = """
                 WITH user_likes_films_CTE AS (
-                    SELECT film_id, user_id\s
-                    FROM user_likes\s
+                    SELECT film_id, user_id
+                    FROM user_likes
                     WHERE user_id = ?),
-                most_similar_user_by_likes_films_CTE AS (
-                    SELECT ul1.user_id, count(*) AS total\s
-                    FROM user_likes ul1\s
-                    JOIN user_likes_films_CTE ul2 on ul2.film_id = ul1.film_id\s
-                    AND NOT ul2.user_id = ul1.user_id
-                    GROUP BY ul1.user_id\s
-                    ORDER BY total DESC\s
-                    LIMIT 1),
-                most_similar_user_likes_films_CTE AS (
-                    SELECT film_id, ul3.user_id\s
-                    FROM user_likes ul3
-                    JOIN most_similar_user_by_likes_films_CTE ul4 on ul3.user_id = ul4.user_id),
-                recommended_films_CTE AS (
-                    SELECT ul5.film_id\s
-                    FROM most_similar_user_likes_films_CTE ul5\s
-                    LEFT JOIN user_likes_films_CTE ul6 on ul6.film_id = ul5.film_id\s
-                    WHERE ul6.user_id IS NULL)
+                    most_similar_user_by_likes_films_CTE AS (
+                        SELECT ul1.user_id, count(*) AS total
+                        FROM user_likes ul1
+                        JOIN user_likes_films_CTE ul2 on ul2.film_id = ul1.film_id
+                        AND NOT ul2.user_id = ul1.user_id
+                        GROUP BY ul1.user_id
+                        ORDER BY total DESC
+                        LIMIT 1),
+                    most_similar_user_likes_films_CTE AS (
+                        SELECT film_id, ul3.user_id
+                        FROM user_likes ul3
+                        JOIN most_similar_user_by_likes_films_CTE ul4 on ul3.user_id = ul4.user_id),
+                        recommended_films_CTE AS (
+                            SELECT ul5.film_id
+                            FROM most_similar_user_likes_films_CTE ul5
+                            LEFT JOIN user_likes_films_CTE ul6 on ul6.film_id = ul5.film_id
+                            WHERE ul6.user_id IS NULL)
                 SELECT *
                 FROM films f
                 JOIN recommended_films_CTE ul7 on f.film_id = ul7.film_id
@@ -211,7 +220,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 FROM films AS f
                 JOIN film_directors fd ON f.film_id = fd.film_id
                 WHERE fd.director_id = ?
-                ORDER BY\s""" + orderClause;
+                ORDER BY""" + orderClause;
 
         List<Film> films = jdbc.query(sql, filmRowMapper, directorId);
         enrichFilms(films);
@@ -220,21 +229,28 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public List<Film> findByTitle(String query) {
-        List<Film> films = jdbc.query(FIND_BY_TITLE_QUERY, filmRowMapper, query);
+        List<Film> films = jdbc.query(FIND_BY_TITLE, filmRowMapper, query);
         enrichFilms(films);
         return films;
     }
 
     @Override
     public List<Film> findByDirector(String query) {
-        List<Film> films = jdbc.query(FIND_BY_DIRECTORS_QUERY, filmRowMapper, query);
+        List<Film> films = jdbc.query(FIND_BY_DIRECTORS, filmRowMapper, query);
         enrichFilms(films);
         return films;
     }
 
     @Override
     public List<Film> findByTitleAndDirector(String query) {
-        List<Film> films = jdbc.query(FIND_BY_TITLE_OR_DIRECTORS_QUERY, filmRowMapper, query, query);
+        List<Film> films = jdbc.query(FIND_BY_TITLE_OR_DIRECTOR, filmRowMapper, query, query);
+        enrichFilms(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        List<Film> films = jdbc.query(FIND_COMMON_FILMS, filmRowMapper, userId, friendId);
         enrichFilms(films);
         return films;
     }
@@ -245,42 +261,46 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         String sql;
 
         if (genreId != null && year != null) {
-            sql = "SELECT f.* " +
-                    "FROM films f " +
-                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-                    "JOIN film_genres fg ON f.film_id = fg.film_id " +
-                    "WHERE fg.genre_id = ? AND EXTRACT(YEAR FROM f.release_date) = ? " +
-                    "GROUP BY f.film_id " +
-                    "ORDER BY COUNT(ul.user_id) DESC " +
-                    "LIMIT ?";
+            sql = """
+                    SELECT f.*
+                    FROM films f
+                    LEFT JOIN user_likes ul ON f.film_id = ul.film_id
+                    JOIN film_genres fg ON f.film_id = fg.film_id
+                    WHERE fg.genre_id = ? AND EXTRACT(YEAR FROM f.release_date) = ?
+                    GROUP BY f.film_id
+                    ORDER BY COUNT(ul.user_id) DESC
+                    LIMIT ?""";
             params.add(genreId);
             params.add(year);
         } else if (genreId != null) {
-            sql = "SELECT f.* " +
-                    "FROM films f " +
-                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-                    "JOIN film_genres fg ON f.film_id = fg.film_id " +
-                    "WHERE fg.genre_id = ? " +
-                    "GROUP BY f.film_id " +
-                    "ORDER BY COUNT(ul.user_id) DESC " +
-                    "LIMIT ?";
+            sql = """
+                    SELECT f.*
+                    FROM films f
+                    LEFT JOIN user_likes ul ON f.film_id = ul.film_id
+                    JOIN film_genres fg ON f.film_id = fg.film_id
+                    WHERE fg.genre_id = ?
+                    GROUP BY f.film_id
+                    ORDER BY COUNT(ul.user_id) DESC
+                    LIMIT ?""";
             params.add(genreId);
         } else if (year != null) {
-            sql = "SELECT f.* " +
-                    "FROM films f " +
-                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? " +
-                    "GROUP BY f.film_id " +
-                    "ORDER BY COUNT(ul.user_id) DESC " +
-                    "LIMIT ?";
+            sql = """
+                    SELECT f.*
+                    FROM films f
+                    LEFT JOIN user_likes ul ON f.film_id = ul.film_id
+                    WHERE EXTRACT(YEAR FROM f.release_date) = ?
+                    GROUP BY f.film_id
+                    ORDER BY COUNT(ul.user_id) DESC
+                    LIMIT ?""";
             params.add(year);
         } else {
-            sql = "SELECT f.* " +
-                    "FROM films f " +
-                    "LEFT JOIN user_likes ul ON f.film_id = ul.film_id " +
-                    "GROUP BY f.film_id " +
-                    "ORDER BY COUNT(ul.user_id) DESC " +
-                    "LIMIT ?";
+            sql = """
+                    SELECT f.*
+                    FROM films f
+                    LEFT JOIN user_likes ul ON f.film_id = ul.film_id
+                    GROUP BY f.film_id
+                    ORDER BY COUNT(ul.user_id) DESC
+                    LIMIT ?""";
         }
         params.add(count);
         List<Film> films = jdbc.query(sql, filmRowMapper, params.toArray());
