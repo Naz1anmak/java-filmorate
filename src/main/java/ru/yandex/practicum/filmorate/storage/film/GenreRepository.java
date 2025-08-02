@@ -24,8 +24,8 @@ public class GenreRepository extends BaseRepository<Genre> {
         super(jdbc, mapper);
     }
 
-    public Optional<Genre> findById(long id) {
-        return findOne(FIND_BY_ID, id);
+    public Optional<Genre> findById(long genreId) {
+        return findOne(FIND_BY_ID, genreId);
     }
 
     public List<Genre> findAll() {
@@ -57,12 +57,6 @@ public class GenreRepository extends BaseRepository<Genre> {
                         GenreRow::getFilmId,
                         Collectors.mapping(GenreRow::getGenre, Collectors.toSet())
                 ));
-    }
-
-    public boolean existsById(long id) {
-        String sql = "SELECT COUNT(*) FROM genres WHERE genre_id = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, id);
-        return count != null && count > 0;
     }
 
     private static class GenreRow {

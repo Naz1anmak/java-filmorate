@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.event;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,6 +10,7 @@ import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.event.EventOperation;
 import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -18,17 +18,20 @@ import java.time.Instant;
 import java.util.List;
 
 @Repository
-@RequiredArgsConstructor
-public class EventStorage {
-    private final JdbcTemplate jdbc;
-    private final RowMapper<Event> eventRowMapper;
+public class EventStorage extends BaseRepository<Event> {
+    private static final String SAVE_EVENT = "INSERT INTO events (user_id, entity_id, " +
+            "timestamp, event_type, event_operation) VALUES (?, ?, ?, ?, ?)";
+    private static final String GET_FEED = " SELECT * FROM events WHERE user_id = ? ORDER BY timestamp";
+
+    public EventStorage(JdbcTemplate jdbc, RowMapper<Event> mapper) {
+        super(jdbc, mapper);
+    }
 
     @Transactional
     public void saveEvent(Long userId, Long entityId, EventType eventType, EventOperation eventOperation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String query = "INSERT INTO events (user_id, entity_id, timestamp, event_type, event_operation) VALUES (?, ?, ?, ?, ?)";
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(SAVE_EVENT, Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, userId);
             ps.setLong(2, entityId);
             ps.setLong(3, Instant.now().toEpochMilli());
@@ -42,13 +45,6 @@ public class EventStorage {
 
     @Transactional
     public List<Event> getFeed(Long userId) {
-        String query = """
-                SELECT *
-                FROM events
-                WHERE user_id = ?
-                ORDER BY timestamp
-                """;
-        return jdbc.query(query, eventRowMapper, userId);
+        return findMany(GET_FEED, userId);
     }
-
 }

@@ -39,8 +39,8 @@ public class DirectorRepository extends BaseRepository<Director> {
         return director;
     }
 
-    public boolean delete(long id) {
-        return delete(DELETE_DIRECTOR_QUERY, id);
+    public boolean delete(long directorId) {
+        return delete(DELETE_DIRECTOR_QUERY, directorId);
     }
 
     public Collection<Director> getDirectors() {

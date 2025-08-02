@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.review.Reviews;
-import ru.yandex.practicum.filmorate.service.ReviewsService;
+import ru.yandex.practicum.filmorate.service.reviews.ReviewsService;
 
 import java.util.List;
 
@@ -12,7 +12,6 @@ import java.util.List;
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 public class ReviewsController {
-
     private final ReviewsService reviewsService;
 
     @PostMapping

@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.film.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.util.Collection;
 import java.util.List;
@@ -52,5 +52,12 @@ public class FilmController {
             @RequestParam String query,
             @RequestParam(defaultValue = "title") String by) {
         return filmService.findByTitleOrDirector(query, by);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(
+            @RequestParam(name = "userId") Long userId,
+            @RequestParam(name = "friendId") Long friendId) {
+        return filmService.getCommonFilms(userId, friendId);
     }
 }

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +8,9 @@ import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.storage.film.DirectorRepository;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -33,19 +36,23 @@ public class DirectorService {
         return director;
     }
 
+    public void delete(long directorId) {
+        if (!directorRepository.delete(directorId)) {
+            throw new NotFoundException("Режиссер с id = " + directorId + " не найден");
+        }
+        log.info("Режиссер с id = {} удален", directorId);
+    }
+
     public Collection<Director> getDirectors() {
         return directorRepository.getDirectors();
     }
 
-    public Director getDirectorById(long id) {
-        return directorRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Режиссер с id = " + id + " не найден"));
+    public Director getDirectorById(long directorId) {
+        return directorRepository.findById(directorId)
+                .orElseThrow(() -> new NotFoundException("Режиссер с id = " + directorId + " не найден"));
     }
 
-    public void delete(long id) {
-        if (!directorRepository.delete(id)) {
-            throw new NotFoundException("Режиссер с id = " + id + " не найден");
-        }
-        log.info("Режиссер с id = {} удален", id);
+    public Map<Long, Set<Director>> findByFilmIds(List<Long> filmIds) {
+        return directorRepository.findByFilmIds(filmIds);
     }
 }

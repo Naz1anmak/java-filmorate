@@ -10,7 +10,6 @@ import java.sql.SQLException;
 
 @Component
 public class EventRowMapper implements RowMapper<Event> {
-
     @Override
     public Event mapRow(ResultSet rs, int rowNum) throws SQLException {
         return Event.builder()
