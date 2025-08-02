@@ -67,14 +67,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             OR LOWER(d.name) LIKE LOWER('%' || ? || '%')
             GROUP BY f.film_id
             ORDER BY likes_count DESC""";
-    private static final String FIND_COMMON_FILMS = """
-            SELECT f.*
-            FROM films f
-            JOIN user_likes ul1 ON f.film_id = ul1.film_id
-            JOIN user_likes ul2 ON f.film_id = ul2.film_id
-            WHERE ul1.user_id = ? AND ul2.user_id = ?
-            GROUP BY f.film_id
-            ORDER BY COUNT(ul1.user_id) DESC""";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmRowMapper filmRowMapper,
                          GenreService genreService, MpaService mpaService, DirectorService directorService, LikeService likeService) {
@@ -250,7 +242,24 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        List<Film> films = jdbc.query(FIND_COMMON_FILMS, filmRowMapper, userId, friendId);
+        String sql = """
+                WITH common AS (
+                  SELECT film_id
+                  FROM user_likes
+                  WHERE user_id = ?
+                  INTERSECT
+                  SELECT film_id
+                  FROM user_likes
+                  WHERE user_id = ?
+                )
+                SELECT f.*
+                FROM films f
+                JOIN common c ON f.film_id = c.film_id
+                LEFT JOIN user_likes ul ON f.film_id = ul.film_id
+                GROUP BY f.film_id
+                ORDER BY COUNT(ul.user_id) DESC
+                """;
+        List<Film> films = jdbc.query(sql, filmRowMapper, friendId, userId);
         enrichFilms(films);
         return films;
     }
