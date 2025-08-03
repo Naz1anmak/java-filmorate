@@ -16,10 +16,8 @@ import ru.yandex.practicum.filmorate.service.event.EventService;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,7 +41,6 @@ public class FilmService {
     public Film update(Film film) {
         filmStorage.findById(film.getId())
                 .orElseThrow(() -> new NotFoundException("Фильм с id=" + film.getId() + " не найден"));
-
         validateAndChange(film);
         filmStorage.update(film);
         log.info("Фильм c id {} обновлен", film.getId());
@@ -70,23 +67,21 @@ public class FilmService {
         Film film = findById(filmId);
         User user = userService.findById(userId);
 
-        Set<Long> likes = likeService.findLikesByFilm(filmId);
-        if (likes.contains(userId)) {
-            throw new IllegalArgumentException("Пользователь уже ставил лайк этому фильму");
-        }
-
-        likeService.addLike(filmId, userId);
-        log.info("Пользователь {} поставил лайк фильму \"{}\"", user.getName(), film.getName());
         eventService.saveEvent(userId, filmId, EventType.LIKE, EventOperation.ADD);
+        Set<Long> likes = likeService.findLikesByFilm(filmId);
+        if (!likes.contains(userId)) {
+            likeService.addLike(filmId, userId);
+            log.info("Пользователь {} поставил лайк фильму \"{}\"", user.getName(), film.getName());
+        }
     }
 
     public void deleteLike(Long filmId, Long userId) {
         Film film = findById(filmId);
         User user = userService.findById(userId);
 
+        eventService.saveEvent(userId, filmId, EventType.LIKE, EventOperation.REMOVE);
         likeService.deleteLike(filmId, userId);
         log.info("Пользователь {} удалил лайк фильму \"{}\"", user.getName(), film.getName());
-        eventService.saveEvent(userId, filmId, EventType.LIKE, EventOperation.REMOVE);
     }
 
     public List<Film> getTopFilms(int count, Long genreId, Integer year) {
@@ -149,7 +144,12 @@ public class FilmService {
 
         Set<Genre> genres = Optional.ofNullable(film.getGenres()).orElse(Set.of());
         genres.forEach(g -> genreService.getGenreById(g.getId()));
-        film.setGenres(genres);
+        if (!genres.isEmpty()) {
+            Set<Genre> genresNew = genres.stream().sorted(Comparator.comparingLong(Genre::getId)).collect(Collectors.toCollection(LinkedHashSet::new));
+            film.setGenres(genresNew);
+        } else {
+            film.setGenres(genres);
+        }
 
         Set<Director> directors = Optional.ofNullable(film.getDirectors()).orElse(Set.of());
         directors.forEach(d -> directorService.getDirectorById(d.getId()));

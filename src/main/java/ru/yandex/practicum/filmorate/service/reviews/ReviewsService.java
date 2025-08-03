@@ -35,8 +35,9 @@ public class ReviewsService {
     public Reviews update(Reviews reviews) {
         validateAndChange(reviews);
         reviewsStorage.update(reviews);
-        eventService.saveEvent(reviews.getUserId(), reviews.getId(), EventType.REVIEW, EventOperation.UPDATE);
-        return reviews;
+        Reviews reviewsTrue = reviewsStorage.findById(reviews.getId()).get();
+        eventService.saveEvent(reviewsTrue.getUserId(), reviewsTrue.getId(), EventType.REVIEW, EventOperation.UPDATE);
+        return reviewsTrue;
     }
 
     public void delete(long id) {

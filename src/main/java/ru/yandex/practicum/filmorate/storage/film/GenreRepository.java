@@ -47,7 +47,7 @@ public class GenreRepository extends BaseRepository<Genre> {
         List<GenreRow> rows = jdbc.query(sql,
                 (rs, rn) -> new GenreRow(
                         rs.getLong("film_id"),
-                        new Genre(rs.getInt("genre_id"), rs.getString("name"))
+                        new Genre(rs.getLong("genre_id"), rs.getString("name"))
                 ),
                 filmIds.toArray()
         );

@@ -63,8 +63,8 @@ public class UserService {
         User user = findById(userId);
         User friend = findById(friendId);
 
-        userStorage.addFriend(userId, friendId);
         eventService.saveEvent(userId, friendId, EventType.FRIEND, EventOperation.ADD);
+        userStorage.addFriend(userId, friendId);
         log.info("{} отправил заявку {} на добавление в друзья!", user.getName(), friend.getName());
 
         if (userStorage.hasFriendRequest(friendId, userId)) {
@@ -81,8 +81,8 @@ public class UserService {
         User user = findById(userId);
         User friend = findById(friendId);
 
-        userStorage.deleteFriend(userId, friendId);
         eventService.saveEvent(userId, friendId, EventType.FRIEND, EventOperation.REMOVE);
+        userStorage.deleteFriend(userId, friendId);
         log.info("{} и {} больше не друзья!", user.getName(), friend.getName());
     }
 
