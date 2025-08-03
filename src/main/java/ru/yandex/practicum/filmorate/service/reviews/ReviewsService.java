@@ -38,7 +38,7 @@ public class ReviewsService {
         Reviews reviewsTrue = reviewsStorage.findById(reviews.getId()).get();
         eventService.saveEvent(reviewsTrue.getUserId(), reviewsTrue.getId(), EventType.REVIEW, EventOperation.UPDATE);
         return reviewsTrue;
-    }
+    } 
 
     public void delete(long id) {
         findById(id);
