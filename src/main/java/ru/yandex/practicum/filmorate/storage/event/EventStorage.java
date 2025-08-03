@@ -27,7 +27,6 @@ public class EventStorage extends BaseRepository<Event> {
     }
 
     public void saveEvent(Long userId, Long entityId, EventType eventType, EventOperation eventOperation) {
-        System.out.println("========================userId = " + userId + ", entityId = " + entityId + " = " + eventType + " = " + eventOperation);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(SAVE_EVENT, Statement.RETURN_GENERATED_KEYS);

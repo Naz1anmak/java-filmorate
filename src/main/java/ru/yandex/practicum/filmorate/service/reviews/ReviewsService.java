@@ -61,28 +61,24 @@ public class ReviewsService {
     public void addLike(long id, long userId) {
         findById(id);
         userService.findById(userId);
-        //eventService.saveEvent(userId, id, EventType.LIKE, EventOperation.ADD);
         reviewLikeService.addLike(id, userId);
     }
 
     public void addDislike(long id, long userId) {
         findById(id);
         userService.findById(userId);
-        //eventService.saveEvent(userId, id, EventType.LIKE, EventOperation.ADD);
         reviewLikeService.addDislike(id, userId);
     }
 
     public void deleteLike(long id, long userId) {
         findById(id);
         userService.findById(userId);
-        //eventService.saveEvent(userId, id, EventType.LIKE, EventOperation.REMOVE);
         reviewLikeService.deleteLike(id, userId);
     }
 
     public void deleteDislike(long id, long userId) {
         findById(id);
         userService.findById(userId);
-        //eventService.saveEvent(userId, id, EventType.LIKE, EventOperation.REMOVE);
         reviewLikeService.deleteLike(id, userId);
     }
 
