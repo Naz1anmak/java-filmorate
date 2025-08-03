@@ -109,6 +109,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
+    @Transactional
     public Film update(Film film) {
         int updated = jdbc.update(UPDATE_QUERY,
                 film.getName(),
@@ -197,9 +198,9 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     @Override
     public List<Film> findByDirectorSorted(Long directorId, String sortBy) {
         String orderClause = switch (sortBy) {
-            case "year" -> "f.release_date";
-            case "likes" -> "(SELECT COUNT(*) FROM user_likes ul WHERE ul.film_id = f.film_id) DESC";
-            default -> throw new IllegalArgumentException("sortBy must be 'year' or 'likes'");
+            case "year" -> " f.release_date";
+            case "likes" -> " (SELECT COUNT(*) FROM user_likes ul WHERE ul.film_id = f.film_id) DESC";
+            default -> throw new IllegalArgumentException(" sortBy must be 'year' or 'likes'");
         };
 
         String sql = """

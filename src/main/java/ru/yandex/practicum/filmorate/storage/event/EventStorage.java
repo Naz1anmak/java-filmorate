@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.event.EventOperation;
@@ -20,15 +19,15 @@ import java.util.List;
 @Repository
 public class EventStorage extends BaseRepository<Event> {
     private static final String SAVE_EVENT = "INSERT INTO events (user_id, entity_id, " +
-            "timestamp, event_type, event_operation) VALUES (?, ?, ?, ?, ?)";
+                                             "timestamp, event_type, event_operation) VALUES (?, ?, ?, ?, ?)";
     private static final String GET_FEED = " SELECT * FROM events WHERE user_id = ? ORDER BY timestamp";
 
     public EventStorage(JdbcTemplate jdbc, RowMapper<Event> mapper) {
         super(jdbc, mapper);
     }
 
-    @Transactional
     public void saveEvent(Long userId, Long entityId, EventType eventType, EventOperation eventOperation) {
+        System.out.println("========================userId = " + userId + ", entityId = " + entityId + " = " + eventType + " = " + eventOperation);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(SAVE_EVENT, Statement.RETURN_GENERATED_KEYS);
@@ -43,7 +42,6 @@ public class EventStorage extends BaseRepository<Event> {
         if (eventId == null) throw new InternalServerException("Не удалось сгенерировать идентификатор события");
     }
 
-    @Transactional
     public List<Event> getFeed(Long userId) {
         return findMany(GET_FEED, userId);
     }

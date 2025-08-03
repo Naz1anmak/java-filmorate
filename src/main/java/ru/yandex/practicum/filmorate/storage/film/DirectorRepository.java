@@ -55,9 +55,9 @@ public class DirectorRepository extends BaseRepository<Director> {
         if (filmIds.isEmpty()) return Map.of();
         String inSql = filmIds.stream().map(id -> "?").collect(Collectors.joining(","));
         String sql = "SELECT fd.film_id, d.director_id, d.name " +
-                "FROM film_directors fd " +
-                "JOIN directors d ON fd.director_id = d.director_id " +
-                "WHERE fd.film_id IN (" + inSql + ")";
+                     "FROM film_directors fd " +
+                     "JOIN directors d ON fd.director_id = d.director_id " +
+                     "WHERE fd.film_id IN (" + inSql + ")";
 
         List<FilmDirectorRow> rows = jdbc.query(
                 sql,

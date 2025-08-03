@@ -35,8 +35,9 @@ public class ReviewsService {
     public Reviews update(Reviews reviews) {
         validateAndChange(reviews);
         reviewsStorage.update(reviews);
-        eventService.saveEvent(reviews.getUserId(), reviews.getId(), EventType.REVIEW, EventOperation.UPDATE);
-        return reviews;
+        Reviews reviewsTrue = reviewsStorage.findById(reviews.getId()).get();
+        eventService.saveEvent(reviewsTrue.getUserId(), reviewsTrue.getId(), EventType.REVIEW, EventOperation.UPDATE);
+        return reviewsTrue;
     }
 
     public void delete(long id) {
@@ -60,24 +61,28 @@ public class ReviewsService {
     public void addLike(long id, long userId) {
         findById(id);
         userService.findById(userId);
+        //eventService.saveEvent(userId, id, EventType.LIKE, EventOperation.ADD);
         reviewLikeService.addLike(id, userId);
     }
 
     public void addDislike(long id, long userId) {
         findById(id);
         userService.findById(userId);
+        //eventService.saveEvent(userId, id, EventType.LIKE, EventOperation.ADD);
         reviewLikeService.addDislike(id, userId);
     }
 
     public void deleteLike(long id, long userId) {
         findById(id);
         userService.findById(userId);
+        //eventService.saveEvent(userId, id, EventType.LIKE, EventOperation.REMOVE);
         reviewLikeService.deleteLike(id, userId);
     }
 
     public void deleteDislike(long id, long userId) {
         findById(id);
         userService.findById(userId);
+        //eventService.saveEvent(userId, id, EventType.LIKE, EventOperation.REMOVE);
         reviewLikeService.deleteLike(id, userId);
     }
 

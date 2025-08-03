@@ -19,6 +19,7 @@ public class DirectorService {
     private final DirectorRepository directorRepository;
 
     public Director create(Director director) {
+        if (director.getName().isBlank()) throw new RuntimeException("Имя режиссера не указано");
         directorRepository.create(director);
         log.info("Добавлен новый режиссер \"{}\" c id {}", director.getName(), director.getId());
         return director;
