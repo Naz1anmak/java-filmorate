@@ -19,7 +19,7 @@ import java.util.List;
 @Repository
 public class EventStorage extends BaseRepository<Event> {
     private static final String SAVE_EVENT = "INSERT INTO events (user_id, entity_id, " +
-                                             "timestamp, event_type, event_operation) VALUES (?, ?, ?, ?, ?)";
+            "timestamp, event_type, event_operation) VALUES (?, ?, ?, ?, ?)";
     private static final String GET_FEED = " SELECT * FROM events WHERE user_id = ? ORDER BY timestamp";
 
     public EventStorage(JdbcTemplate jdbc, RowMapper<Event> mapper) {

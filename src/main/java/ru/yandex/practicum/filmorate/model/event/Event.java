@@ -30,5 +30,4 @@ public class Event {
 
     @NotBlank
     private EventOperation operation;
-
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller.film;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.film.Director;
@@ -24,7 +25,7 @@ public class DirectorController {
     }
 
     @PostMapping
-    public Director createDirector(@RequestBody Director director) {
+    public Director createDirector(@Valid @RequestBody Director director) {
         return directorService.create(director);
     }
 

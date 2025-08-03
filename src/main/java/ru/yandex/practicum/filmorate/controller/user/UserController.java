@@ -53,5 +53,4 @@ public class UserController {
     public List<Event> getFeed(@PathVariable("id") Long userId) {
         return userService.getFeed(userId);
     }
-
 }
