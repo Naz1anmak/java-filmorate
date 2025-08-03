@@ -71,7 +71,7 @@ class FilmoRateApplicationTests {
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(100)
                 .mpaRating(new MpaRating(1, "G"))
-                .genres(new LinkedHashSet<>(Set.of(new Genre(1, "Комедия"))))
+                .genres(new LinkedHashSet<>(Set.of(new Genre(1L, "Комедия"))))
                 .build();
         Film f2 = Film.builder()
                 .name("Film2")
@@ -79,7 +79,7 @@ class FilmoRateApplicationTests {
                 .releaseDate(LocalDate.of(2010, 2, 2))
                 .duration(120)
                 .mpaRating(new MpaRating(2, "PG"))
-                .genres(new LinkedHashSet<>(Set.of(new Genre(2, "Драма"))))
+                .genres(new LinkedHashSet<>(Set.of(new Genre(2L, "Драма"))))
                 .build();
         filmId1 = filmStorage.create(f1).getId();
         filmId2 = filmStorage.create(f2).getId();
@@ -147,7 +147,7 @@ class FilmoRateApplicationTests {
                 .releaseDate(LocalDate.of(1972, 5, 5))
                 .duration(169)
                 .mpaRating(new MpaRating(2, "PG"))
-                .genres(new LinkedHashSet<>(Set.of(new Genre(2, "Драма"), new Genre(4, "Триллер"))))
+                .genres(new LinkedHashSet<>(Set.of(new Genre(2L, "Драма"), new Genre(4L, "Триллер"))))
                 .build();
         Film saved = filmStorage.create(f);
 
