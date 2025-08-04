@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,7 +63,7 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     }
 
     @Override
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         return findMany(FIND_ALL_QUERY);
     }
 

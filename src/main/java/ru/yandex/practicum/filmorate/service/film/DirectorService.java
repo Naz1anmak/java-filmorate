@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.storage.film.DirectorRepository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +43,7 @@ public class DirectorService {
         log.info("Режиссер с id = {} удален", directorId);
     }
 
-    public Collection<Director> getDirectors() {
+    public List<Director> getDirectors() {
         return directorRepository.getDirectors();
     }
 
