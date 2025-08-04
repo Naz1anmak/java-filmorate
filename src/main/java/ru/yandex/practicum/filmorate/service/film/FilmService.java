@@ -16,7 +16,9 @@ import ru.yandex.practicum.filmorate.service.event.EventService;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -143,12 +145,6 @@ public class FilmService {
 
         Set<Genre> genres = Optional.ofNullable(film.getGenres()).orElse(Set.of());
         genres.forEach(g -> genreService.getGenreById(g.getId()));
-       /* if (!genres.isEmpty()) {
-            Set<Genre> genresNew = genres.stream().sorted(Comparator.comparingLong(Genre::getId)).collect(Collectors.toCollection(LinkedHashSet::new));
-            film.setGenres(genresNew);
-        } else {
-            film.setGenres(genres);
-        }*/
         film.setGenres(genres);
 
         Set<Director> directors = Optional.ofNullable(film.getDirectors()).orElse(Set.of());

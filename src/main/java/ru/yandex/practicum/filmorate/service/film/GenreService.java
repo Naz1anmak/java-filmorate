@@ -24,10 +24,6 @@ public class GenreService {
         return genreRepository.findAll();
     }
 
-    public List<Genre> findByFilmId(long filmId) {
-        return genreRepository.findByFilmId(filmId);
-    }
-
     public Map<Long, Set<Genre>> findByFilmIds(List<Long> filmIds) {
         return genreRepository.findByFilmIds(filmIds);
     }

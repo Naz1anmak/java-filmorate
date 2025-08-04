@@ -197,23 +197,27 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public List<Film> findByDirectorSorted(Long directorId, String sortBy) {
-        String orderClause = switch (sortBy) {
-            case "year" -> " f.release_date";
-            case "likes" -> " (SELECT COUNT(*) FROM user_likes ul WHERE ul.film_id = f.film_id) DESC";
-            default -> throw new IllegalArgumentException(" sortBy must be 'year' or 'likes'");
-        };
-
-        String sql = """
+        String baseSql = """
                 SELECT f.film_id,
                        f.name,
                        f.description,
                        f.release_date,
                        f.duration,
                        f.mpa_rating_id
-                FROM films AS f
+                FROM films f
                 JOIN film_directors fd ON f.film_id = fd.film_id
+                LEFT JOIN user_likes ul ON f.film_id = ul.film_id
                 WHERE fd.director_id = ?
-                ORDER BY""" + orderClause;
+                GROUP BY f.film_id, f.name, f.description, f.release_date, f.duration, f.mpa_rating_id
+                """;
+
+        String orderClause = switch (sortBy) {
+            case "year" -> " ORDER BY f.release_date";
+            case "likes" -> " ORDER BY COUNT(ul.user_id) DESC";
+            default -> throw new IllegalArgumentException("sortBy must be 'year' or 'likes'");
+        };
+
+        String sql = baseSql + orderClause;
 
         List<Film> films = jdbc.query(sql, filmRowMapper, directorId);
         enrichFilms(films);
