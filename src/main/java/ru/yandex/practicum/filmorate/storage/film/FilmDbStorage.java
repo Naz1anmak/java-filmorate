@@ -148,7 +148,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getFilms() {
+    public List<Film> getFilms() {
         List<Film> films = jdbc.query(FIND_ALL, filmRowMapper);
         enrichFilms(films);
         return films;

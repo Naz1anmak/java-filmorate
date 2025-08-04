@@ -43,7 +43,7 @@ public class DirectorRepository extends BaseRepository<Director> {
         return delete(DELETE_DIRECTOR_QUERY, directorId);
     }
 
-    public Collection<Director> getDirectors() {
+    public List<Director> getDirectors() {
         return findMany(FIND_ALL_QUERY);
     }
 

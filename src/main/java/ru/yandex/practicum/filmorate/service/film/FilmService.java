@@ -17,7 +17,6 @@ import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -59,7 +58,7 @@ public class FilmService {
                 .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден"));
     }
 
-    public Collection<Film> getFilms() {
+    public List<Film> getFilms() {
         return filmStorage.getFilms();
     }
 
@@ -144,12 +143,13 @@ public class FilmService {
 
         Set<Genre> genres = Optional.ofNullable(film.getGenres()).orElse(Set.of());
         genres.forEach(g -> genreService.getGenreById(g.getId()));
-        if (!genres.isEmpty()) {
+       /* if (!genres.isEmpty()) {
             Set<Genre> genresNew = genres.stream().sorted(Comparator.comparingLong(Genre::getId)).collect(Collectors.toCollection(LinkedHashSet::new));
             film.setGenres(genresNew);
         } else {
             film.setGenres(genres);
-        }
+        }*/
+        film.setGenres(genres);
 
         Set<Director> directors = Optional.ofNullable(film.getDirectors()).orElse(Set.of());
         directors.forEach(d -> directorService.getDirectorById(d.getId()));
