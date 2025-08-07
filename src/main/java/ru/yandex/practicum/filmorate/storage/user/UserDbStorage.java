@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +14,8 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE user_id = ?";
     private static final String INSERT_QUERY = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ?" +
-            " WHERE user_id = ?";
+    private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? " +
+            "WHERE user_id = ?";
     private static final String INSERT_FRIENDSHIP_QUERY = "INSERT INTO friendship (user_id, friend_id, status) " +
             "VALUES (?, ?, 'PENDING')";
     public static final String DELETE_FRIENDSHIP_QUERY = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";
@@ -27,7 +26,7 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
             "JOIN friendship f1 ON u.user_id = f1.friend_id " +
             "JOIN friendship f2 ON u.user_id = f2.friend_id " +
             "WHERE f1.user_id = ? AND f2.user_id = ?";
-
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE user_id = ?";
 
     public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
@@ -60,11 +59,11 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     @Override
     public boolean delete(Long userId) {
-        return delete("DELETE FROM users WHERE user_id = ?", userId);
+        return delete(DELETE_USER_QUERY, userId);
     }
 
     @Override
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         return findMany(FIND_ALL_QUERY);
     }
 

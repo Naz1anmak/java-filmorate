@@ -15,23 +15,23 @@ import java.util.stream.Collectors;
 public class LikeRepository {
     private final JdbcTemplate jdbc;
 
-    private static final String ADD_LIKE_SQL =
+    private static final String ADD_LIKE =
             "INSERT INTO user_likes (film_id, user_id) VALUES (?, ?)";
-    private static final String DELETE_LIKE_SQL =
+    private static final String DELETE_LIKE =
             "DELETE FROM user_likes WHERE film_id = ? AND user_id = ?";
-    private static final String FIND_LIKES_BY_FILM_SQL =
+    private static final String FIND_LIKES_BY_FILM =
             "SELECT user_id FROM user_likes WHERE film_id = ?";
 
     public void addLike(long filmId, long userId) {
-        jdbc.update(ADD_LIKE_SQL, filmId, userId);
+        jdbc.update(ADD_LIKE, filmId, userId);
     }
 
     public void deleteLike(long filmId, long userId) {
-        jdbc.update(DELETE_LIKE_SQL, filmId, userId);
+        jdbc.update(DELETE_LIKE, filmId, userId);
     }
 
     public Set<Long> findLikesByFilm(long filmId) {
-        return new HashSet<>(jdbc.queryForList(FIND_LIKES_BY_FILM_SQL, Long.class, filmId));
+        return new HashSet<>(jdbc.queryForList(FIND_LIKES_BY_FILM, Long.class, filmId));
     }
 
     public Map<Long, Set<Long>> findByFilmIds(List<Long> filmIds) {
@@ -39,7 +39,9 @@ public class LikeRepository {
         String inSql = filmIds.stream().map(id -> "?").collect(Collectors.joining(","));
         String sql = "SELECT film_id, user_id FROM user_likes WHERE film_id IN (" + inSql + ")";
         List<LikeRow> rows = jdbc.query(sql,
-                (rs, rn) -> new LikeRow(rs.getLong("film_id"), rs.getLong("user_id")),
+                (rs, rn) -> new LikeRow(
+                        rs.getLong("film_id"),
+                        rs.getLong("user_id")),
                 filmIds.toArray()
         );
         return rows.stream()

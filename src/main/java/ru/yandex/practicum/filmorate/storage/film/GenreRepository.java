@@ -16,24 +16,17 @@ import java.util.stream.Collectors;
 public class GenreRepository extends BaseRepository<Genre> {
     private static final String FIND_ALL = "SELECT * FROM genres";
     private static final String FIND_BY_ID = "SELECT * FROM genres WHERE genre_id = ?";
-    private static final String FIND_BY_FILM = "SELECT g.* FROM film_genres fg " +
-            "JOIN genres g ON fg.genre_id = g.genre_id " +
-            "WHERE fg.film_id = ?";
 
     public GenreRepository(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper);
     }
 
-    public Optional<Genre> findById(int id) {
-        return findOne(FIND_BY_ID, id);
+    public Optional<Genre> findById(long genreId) {
+        return findOne(FIND_BY_ID, genreId);
     }
 
     public List<Genre> findAll() {
         return findMany(FIND_ALL);
-    }
-
-    public List<Genre> findByFilmId(long filmId) {
-        return findMany(FIND_BY_FILM, filmId);
     }
 
     public Map<Long, Set<Genre>> findByFilmIds(List<Long> filmIds) {
@@ -47,7 +40,7 @@ public class GenreRepository extends BaseRepository<Genre> {
         List<GenreRow> rows = jdbc.query(sql,
                 (rs, rn) -> new GenreRow(
                         rs.getLong("film_id"),
-                        new Genre(rs.getInt("genre_id"), rs.getString("name"))
+                        new Genre(rs.getLong("genre_id"), rs.getString("name"))
                 ),
                 filmIds.toArray()
         );
